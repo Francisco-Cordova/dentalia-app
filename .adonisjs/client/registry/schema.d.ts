@@ -79,6 +79,18 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'insumos': {
+    methods: ["GET","HEAD"]
+    pattern: '/insumos'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'home': {
     methods: ["GET","HEAD"]
     pattern: '/home'

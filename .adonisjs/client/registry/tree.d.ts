@@ -15,5 +15,6 @@ export interface ApiDefinition {
     verify: typeof routes['magic_link.verify']
   }
   skus: typeof routes['skus']
+  insumos: typeof routes['insumos']
   home: typeof routes['home']
 }

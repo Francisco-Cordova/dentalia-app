@@ -10,6 +10,7 @@ export type ScannedRoutes = {
     'magic_link.send': { paramsTuple?: []; params?: {} }
     'magic_link.verify': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'skus': { paramsTuple?: []; params?: {} }
+    'insumos': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
   }
@@ -18,6 +19,7 @@ export type ScannedRoutes = {
     'new_account.create': { paramsTuple?: []; params?: {} }
     'magic_link.verify': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'skus': { paramsTuple?: []; params?: {} }
+    'insumos': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
@@ -25,6 +27,7 @@ export type ScannedRoutes = {
     'new_account.create': { paramsTuple?: []; params?: {} }
     'magic_link.verify': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'skus': { paramsTuple?: []; params?: {} }
+    'insumos': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
   }
   POST: {

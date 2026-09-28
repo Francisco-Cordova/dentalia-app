@@ -751,6 +751,16 @@ button:hover {
   box-shadow: 0 0 0 3px rgba(2, 5, 211, 0.08);
 }
 
+.insumos-toolbar .skus-search {
+  flex: 1;
+}
+
+.insumos-toolbar .skus-search input {
+  width: 100%;
+  height: 48px;
+  border-radius: 10px;
+}
+
 .skus-card {
   background: #fff;
   border: 1px solid #e5e9f0;

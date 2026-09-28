@@ -26,6 +26,7 @@ router
 router
   .group(() => {
     router.on('/skus').renderInertia('skus', {}).as('skus')
+    router.on('/insumos').renderInertia('insumos', {}).as('insumos')
     router.on('/home').renderInertia('home', {}).as('home')
     router.post('logout', [controllers.Session, 'destroy'])
   })

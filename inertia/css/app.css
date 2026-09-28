@@ -45,32 +45,6 @@ h6 {
   color: var(--gray-12);
 }
 
-/* Header */
-header {
-  max-width: 1440px;
-  margin: auto;
-  padding: 0 30px;
-}
-header > div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 64px;
-}
-header nav {
-  display: flex;
-  align-items: center;
-  gap: 26px;
-}
-header nav a {
-  font-weight: 500;
-  color: var(--gray-8);
-}
-header nav a:hover,
-header nav a.current {
-  color: var(--gray-12);
-}
-
 /* Main */
 main {
   max-width: 1440px;
@@ -717,7 +691,7 @@ button:hover {
 
 /* Página SKUs */
 .skus-page {
-  padding: 28px 32px;
+  padding: 28px 0;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -725,35 +699,26 @@ button:hover {
 
 .skus-topbar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 20px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  width: auto;
+  padding: 0 32px;
 }
 
-.skus-heading h1 {
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.3px;
-  color: #091747;
-}
-
-.skus-heading p {
-  font-size: 13px;
-  color: #667b91;
-  margin-top: 2px;
-}
-
-.skus-actions {
+.sku-actions2 {
   display: flex;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  margin-left: auto;
 }
 
 .skus-toolbar {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  padding: 0 32px;
 }
 
 .skus-search {
@@ -791,6 +756,7 @@ button:hover {
   border: 1px solid #e5e9f0;
   border-radius: 12px;
   overflow: hidden;
+  margin: 0 32px;
 }
 
 .sku-table {

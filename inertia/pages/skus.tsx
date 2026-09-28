@@ -128,12 +128,12 @@ const skus: SkuRow[] = [
 export default function Skus() {
   return (
     <div className="skus-page">
-      <header className="skus-topbar">
-        <div className="skus-heading">
-          <h1>SKUs</h1>
-          <p>Catálogo digital de Dentalia</p>
-        </div>
-        <div className="skus-actions">
+      <div className="skus-topbar">
+        <button type="button" className="btn btn-primary">
+          <Icon name="plusLg" size={18} />
+          Nuevo SKU
+        </button>
+        <div className="sku-actions2">
           <button type="button" className="btn btn-outline">
             <Icon name="pencil" size={18} />
             Edición masiva
@@ -142,12 +142,8 @@ export default function Skus() {
             <Icon name="arrowsDownUp" size={18} />
             Ordenar
           </button>
-          <button type="button" className="btn btn-primary">
-            <Icon name="plusLg" size={18} />
-            Nuevo SKU
-          </button>
         </div>
-      </header>
+      </div>
 
       <div className="skus-toolbar">
         <label className="skus-search">

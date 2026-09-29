@@ -60,6 +60,12 @@ const routes = {
     tokens: [{"old":"/usuarios","type":0,"val":"usuarios","end":""}],
     types: placeholder as Registry['usuarios']['types'],
   },
+  'zonas': {
+    methods: ["GET","HEAD"],
+    pattern: '/zonas',
+    tokens: [{"old":"/zonas","type":0,"val":"zonas","end":""}],
+    types: placeholder as Registry['zonas']['types'],
+  },
   'home': {
     methods: ["GET","HEAD"],
     pattern: '/home',

@@ -115,6 +115,18 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'zonas': {
+    methods: ["GET","HEAD"]
+    pattern: '/zonas'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'home': {
     methods: ["GET","HEAD"]
     pattern: '/home'

@@ -9,11 +9,12 @@ type Section = 'skus' | 'insumos' | 'admin'
 export default function AdminLayout({ children }: { children: ReactElement<Data.SharedProps> }) {
   const { url, props } = usePage()
   const user = props.user
-  const activeSection: Section = url.includes('/usuarios')
-    ? 'admin'
-    : url.includes('/insumos') || url.includes('/kits')
-      ? 'insumos'
-      : 'skus'
+  const activeSection: Section =
+    url.includes('/usuarios') || url.includes('/zonas')
+      ? 'admin'
+      : url.includes('/insumos') || url.includes('/kits')
+        ? 'insumos'
+        : 'skus'
   const [collapsed, setCollapsed] = useState(false)
   const [open, setOpen] = useState<Section[]>(['admin', activeSection])
   const [userMenu, setUserMenu] = useState(false)
@@ -119,9 +120,12 @@ export default function AdminLayout({ children }: { children: ReactElement<Data.
                 >
                   Usuarios
                 </Link>
-                <a href="#" className="admin-nav-subitem">
+                <Link
+                  route="zonas"
+                  className={`admin-nav-subitem${url.includes('/zonas') ? ' active' : ''}`}
+                >
                   Zonas
-                </a>
+                </Link>
                 <a href="#" className="admin-nav-subitem">
                   Módulos de salud
                 </a>

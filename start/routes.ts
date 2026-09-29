@@ -29,6 +29,7 @@ router
     router.on('/insumos').renderInertia('insumos', {}).as('insumos')
     router.on('/kits').renderInertia('kits', {}).as('kits')
     router.on('/usuarios').renderInertia('usuarios', {}).as('usuarios')
+    router.on('/zonas').renderInertia('zonas', {}).as('zonas')
     router.on('/home').renderInertia('home', {}).as('home')
     router.post('logout', [controllers.Session, 'destroy'])
   })

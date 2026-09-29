@@ -21,5 +21,6 @@ declare module '@adonisjs/inertia/types' {
     'kits': ExtractProps<(typeof import('../../inertia/pages/kits.tsx'))['default']>
     'skus': ExtractProps<(typeof import('../../inertia/pages/skus.tsx'))['default']>
     'usuarios': ExtractProps<(typeof import('../../inertia/pages/usuarios.tsx'))['default']>
+    'zonas': ExtractProps<(typeof import('../../inertia/pages/zonas.tsx'))['default']>
   }
 }

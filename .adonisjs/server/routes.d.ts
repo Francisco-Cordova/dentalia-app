@@ -13,6 +13,7 @@ export type ScannedRoutes = {
     'insumos': { paramsTuple?: []; params?: {} }
     'kits': { paramsTuple?: []; params?: {} }
     'usuarios': { paramsTuple?: []; params?: {} }
+    'zonas': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
   }
@@ -24,6 +25,7 @@ export type ScannedRoutes = {
     'insumos': { paramsTuple?: []; params?: {} }
     'kits': { paramsTuple?: []; params?: {} }
     'usuarios': { paramsTuple?: []; params?: {} }
+    'zonas': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
@@ -34,6 +36,7 @@ export type ScannedRoutes = {
     'insumos': { paramsTuple?: []; params?: {} }
     'kits': { paramsTuple?: []; params?: {} }
     'usuarios': { paramsTuple?: []; params?: {} }
+    'zonas': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
   }
   POST: {

@@ -17,5 +17,6 @@ export interface ApiDefinition {
   skus: typeof routes['skus']
   insumos: typeof routes['insumos']
   kits: typeof routes['kits']
+  usuarios: typeof routes['usuarios']
   home: typeof routes['home']
 }

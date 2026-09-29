@@ -54,6 +54,12 @@ const routes = {
     tokens: [{"old":"/kits","type":0,"val":"kits","end":""}],
     types: placeholder as Registry['kits']['types'],
   },
+  'usuarios': {
+    methods: ["GET","HEAD"],
+    pattern: '/usuarios',
+    tokens: [{"old":"/usuarios","type":0,"val":"usuarios","end":""}],
+    types: placeholder as Registry['usuarios']['types'],
+  },
   'home': {
     methods: ["GET","HEAD"],
     pattern: '/home',

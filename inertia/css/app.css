@@ -689,6 +689,60 @@ button:hover {
   color: #091747;
 }
 
+.sku-row-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.sku-dropdown-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+}
+
+.sku-row-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 40;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid #e5e9f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(9, 23, 71, 0.12);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sku-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #091747;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sku-dropdown-item:hover {
+  background: #f5faff;
+}
+
+.sku-dropdown-item.danger {
+  color: #d92d20;
+}
+
+.sku-dropdown-item.danger:hover {
+  background: #fef3f2;
+}
+
 /* Página SKUs */
 .skus-page {
   padding: 28px 0;

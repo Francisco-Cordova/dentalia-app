@@ -11,6 +11,7 @@ export type ScannedRoutes = {
     'magic_link.verify': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'skus': { paramsTuple?: []; params?: {} }
     'insumos': { paramsTuple?: []; params?: {} }
+    'kits': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
   }
@@ -20,6 +21,7 @@ export type ScannedRoutes = {
     'magic_link.verify': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'skus': { paramsTuple?: []; params?: {} }
     'insumos': { paramsTuple?: []; params?: {} }
+    'kits': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
@@ -28,6 +30,7 @@ export type ScannedRoutes = {
     'magic_link.verify': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'skus': { paramsTuple?: []; params?: {} }
     'insumos': { paramsTuple?: []; params?: {} }
+    'kits': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
   }
   POST: {

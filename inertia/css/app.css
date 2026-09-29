@@ -888,3 +888,120 @@ button:hover {
   background: #091747;
   color: #fff;
 }
+
+/* Modal kits */
+.kits-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(9, 23, 71, 0.45);
+  padding: 0 32px;
+}
+
+.kits-modal {
+  position: relative;
+  width: 100%;
+  max-width: 432px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 24px 60px rgba(9, 23, 71, 0.25);
+}
+
+.kits-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.kits-modal-title {
+  margin: 0;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  color: #091747;
+}
+
+.kits-modal-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #5a6b7f;
+}
+
+.kits-modal-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 20px 0 16px;
+  border-bottom: 1px solid #e5e9f0;
+}
+
+.kits-modal-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: default;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+}
+
+.kits-modal-tab.active {
+  color: #091747;
+  border-bottom-color: #0205d3;
+}
+
+.kits-modal-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.kits-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kits-field span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.kits-field input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #e5e9f0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #091747;
+}
+
+.kits-field input:focus {
+  outline: none;
+  border-color: #0205d3;
+  box-shadow: 0 0 0 3px rgba(2, 5, 211, 0.08);
+}
+
+.kits-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.kits-modal-actions .btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

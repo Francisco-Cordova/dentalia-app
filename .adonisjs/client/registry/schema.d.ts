@@ -91,6 +91,18 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'kits': {
+    methods: ["GET","HEAD"]
+    pattern: '/kits'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'home': {
     methods: ["GET","HEAD"]
     pattern: '/home'

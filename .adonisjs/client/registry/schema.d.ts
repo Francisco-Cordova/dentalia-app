@@ -79,6 +79,18 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'familias': {
+    methods: ["GET","HEAD"]
+    pattern: '/familias'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'insumos': {
     methods: ["GET","HEAD"]
     pattern: '/insumos'

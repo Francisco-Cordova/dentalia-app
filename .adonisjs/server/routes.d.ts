@@ -10,6 +10,7 @@ export type ScannedRoutes = {
     'magic_link.send': { paramsTuple?: []; params?: {} }
     'magic_link.verify': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'skus': { paramsTuple?: []; params?: {} }
+    'familias': { paramsTuple?: []; params?: {} }
     'insumos': { paramsTuple?: []; params?: {} }
     'kits': { paramsTuple?: []; params?: {} }
     'usuarios': { paramsTuple?: []; params?: {} }
@@ -23,6 +24,7 @@ export type ScannedRoutes = {
     'new_account.create': { paramsTuple?: []; params?: {} }
     'magic_link.verify': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'skus': { paramsTuple?: []; params?: {} }
+    'familias': { paramsTuple?: []; params?: {} }
     'insumos': { paramsTuple?: []; params?: {} }
     'kits': { paramsTuple?: []; params?: {} }
     'usuarios': { paramsTuple?: []; params?: {} }
@@ -35,6 +37,7 @@ export type ScannedRoutes = {
     'new_account.create': { paramsTuple?: []; params?: {} }
     'magic_link.verify': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'skus': { paramsTuple?: []; params?: {} }
+    'familias': { paramsTuple?: []; params?: {} }
     'insumos': { paramsTuple?: []; params?: {} }
     'kits': { paramsTuple?: []; params?: {} }
     'usuarios': { paramsTuple?: []; params?: {} }

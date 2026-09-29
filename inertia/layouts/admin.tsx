@@ -16,14 +16,8 @@ export default function AdminLayout({ children }: { children: ReactElement<Data.
         ? 'insumos'
         : 'skus'
   const [collapsed, setCollapsed] = useState(false)
-  const [open, setOpen] = useState<Section[]>(['admin', activeSection])
+  const [open, setOpen] = useState<Section[]>(['skus', 'insumos', 'admin'])
   const [userMenu, setUserMenu] = useState(false)
-  const [prevUrl, setPrevUrl] = useState(url)
-
-  if (prevUrl !== url) {
-    setPrevUrl(url)
-    setOpen(['admin', activeSection])
-  }
 
   const toggle = (section: Section) =>
     setOpen((prev) =>
@@ -57,19 +51,28 @@ export default function AdminLayout({ children }: { children: ReactElement<Data.
             >
               <Icon name="gridFill" size={18} />
               {!collapsed && <span>SKUs</span>}
-              {!collapsed && <Icon name="caretDown" size={14} className="admin-nav-caret" />}
+              {!collapsed && (
+                <Icon
+                  name={open.includes('skus') ? 'caretUp' : 'caretDown'}
+                  size={14}
+                  className="admin-nav-caret"
+                />
+              )}
             </button>
             {!collapsed && open.includes('skus') && (
               <div className="admin-nav-sub">
                 <Link
                   route="skus"
-                  className={`admin-nav-subitem${activeSection === 'skus' ? ' active' : ''}`}
+                  className={`admin-nav-subitem${url.includes('/skus') ? ' active' : ''}`}
                 >
                   SKUs
                 </Link>
-                <a href="#" className="admin-nav-subitem">
+                <Link
+                  route="familias"
+                  className={`admin-nav-subitem${url.includes('/familias') ? ' active' : ''}`}
+                >
                   Familias
-                </a>
+                </Link>
               </div>
             )}
           </div>
@@ -82,7 +85,13 @@ export default function AdminLayout({ children }: { children: ReactElement<Data.
             >
               <Icon name="boxSeam" size={18} />
               {!collapsed && <span>Insumos</span>}
-              {!collapsed && <Icon name="caretDown" size={14} className="admin-nav-caret" />}
+              {!collapsed && (
+                <Icon
+                  name={open.includes('insumos') ? 'caretUp' : 'caretDown'}
+                  size={14}
+                  className="admin-nav-caret"
+                />
+              )}
             </button>
             {!collapsed && open.includes('insumos') && (
               <div className="admin-nav-sub">
@@ -90,7 +99,7 @@ export default function AdminLayout({ children }: { children: ReactElement<Data.
                   route="insumos"
                   className={`admin-nav-subitem${url.includes('/insumos') ? ' active' : ''}`}
                 >
-                  insumos
+                  Insumos
                 </Link>
                 <Link
                   route="kits"
@@ -110,7 +119,13 @@ export default function AdminLayout({ children }: { children: ReactElement<Data.
             >
               <Icon name="keyFill" size={18} />
               {!collapsed && <span>Admin</span>}
-              {!collapsed && <Icon name="caretDown" size={14} className="admin-nav-caret" />}
+              {!collapsed && (
+                <Icon
+                  name={open.includes('admin') ? 'caretUp' : 'caretDown'}
+                  size={14}
+                  className="admin-nav-caret"
+                />
+              )}
             </button>
             {!collapsed && open.includes('admin') && (
               <div className="admin-nav-sub">

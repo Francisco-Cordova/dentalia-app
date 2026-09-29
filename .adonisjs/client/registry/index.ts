@@ -42,6 +42,12 @@ const routes = {
     tokens: [{"old":"/skus","type":0,"val":"skus","end":""}],
     types: placeholder as Registry['skus']['types'],
   },
+  'familias': {
+    methods: ["GET","HEAD"],
+    pattern: '/familias',
+    tokens: [{"old":"/familias","type":0,"val":"familias","end":""}],
+    types: placeholder as Registry['familias']['types'],
+  },
   'insumos': {
     methods: ["GET","HEAD"],
     pattern: '/insumos',

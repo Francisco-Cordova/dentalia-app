@@ -14,6 +14,7 @@ export type ScannedRoutes = {
     'kits': { paramsTuple?: []; params?: {} }
     'usuarios': { paramsTuple?: []; params?: {} }
     'zonas': { paramsTuple?: []; params?: {} }
+    'modulosDeSalud': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
   }
@@ -26,6 +27,7 @@ export type ScannedRoutes = {
     'kits': { paramsTuple?: []; params?: {} }
     'usuarios': { paramsTuple?: []; params?: {} }
     'zonas': { paramsTuple?: []; params?: {} }
+    'modulosDeSalud': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
@@ -37,6 +39,7 @@ export type ScannedRoutes = {
     'kits': { paramsTuple?: []; params?: {} }
     'usuarios': { paramsTuple?: []; params?: {} }
     'zonas': { paramsTuple?: []; params?: {} }
+    'modulosDeSalud': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
   }
   POST: {

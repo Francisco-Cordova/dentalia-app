@@ -66,6 +66,12 @@ const routes = {
     tokens: [{"old":"/zonas","type":0,"val":"zonas","end":""}],
     types: placeholder as Registry['zonas']['types'],
   },
+  'modulosDeSalud': {
+    methods: ["GET","HEAD"],
+    pattern: '/modulos-de-salud',
+    tokens: [{"old":"/modulos-de-salud","type":0,"val":"modulos-de-salud","end":""}],
+    types: placeholder as Registry['modulosDeSalud']['types'],
+  },
   'home': {
     methods: ["GET","HEAD"],
     pattern: '/home',

@@ -10,7 +10,7 @@ export default function AdminLayout({ children }: { children: ReactElement<Data.
   const { url, props } = usePage()
   const user = props.user
   const activeSection: Section =
-    url.includes('/usuarios') || url.includes('/zonas')
+    url.includes('/usuarios') || url.includes('/zonas') || url.includes('/modulos-de-salud')
       ? 'admin'
       : url.includes('/insumos') || url.includes('/kits')
         ? 'insumos'
@@ -126,9 +126,12 @@ export default function AdminLayout({ children }: { children: ReactElement<Data.
                 >
                   Zonas
                 </Link>
-                <a href="#" className="admin-nav-subitem">
+                <Link
+                  route="modulosDeSalud"
+                  className={`admin-nav-subitem${url.includes('/modulos-de-salud') ? ' active' : ''}`}
+                >
                   Módulos de salud
-                </a>
+                </Link>
               </div>
             )}
           </div>

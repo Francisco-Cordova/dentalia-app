@@ -30,6 +30,7 @@ router
     router.on('/kits').renderInertia('kits', {}).as('kits')
     router.on('/usuarios').renderInertia('usuarios', {}).as('usuarios')
     router.on('/zonas').renderInertia('zonas', {}).as('zonas')
+    router.on('/modulos-de-salud').renderInertia('modulos_de_salud', {}).as('modulosDeSalud')
     router.on('/home').renderInertia('home', {}).as('home')
     router.post('logout', [controllers.Session, 'destroy'])
   })

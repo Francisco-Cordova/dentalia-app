@@ -31,4 +31,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   SMTP_USERNAME: Env.schema.string.optional(),
   SMTP_PASSWORD: Env.schema.string.optional(),
   MAIL_FROM: Env.schema.string.optional(),
+
+  // Supabase (PostgreSQL)
+  SUPABASE_DB_URL: Env.schema.string(),
 })

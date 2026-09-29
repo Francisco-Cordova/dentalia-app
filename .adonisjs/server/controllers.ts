@@ -4,6 +4,7 @@
  */
 
 export const controllers = {
+  Insumos: () => import('#controllers/insumos_controller'),
   MagicLink: () => import('#controllers/magic_link_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
   Session: () => import('#controllers/session_controller'),

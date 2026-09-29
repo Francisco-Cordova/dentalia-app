@@ -801,6 +801,17 @@ button:hover {
   box-shadow: 0 0 0 3px rgba(2, 5, 211, 0.08);
 }
 
+/*
+ * La regla global de las vistas de auth (`form { flex-direction: column }`)
+ * también alcanza al <form> de los buscadores, por eso forzamos fila con un
+ * buscador a la izquierda y otro a la derecha.
+ */
+.insumos-toolbar {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
 .insumos-toolbar .skus-search {
   flex: 1;
 }

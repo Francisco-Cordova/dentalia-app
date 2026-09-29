@@ -1,3 +1,5 @@
+import { type FormEvent, type KeyboardEvent } from 'react'
+import { Link, useRouter } from '@adonisjs/inertia/react'
 import Icon from '~/components/icon'
 
 type InsumoRow = {
@@ -5,94 +7,68 @@ type InsumoRow = {
   nombre: string
   codigo: string
   categoria: string
-  cantidad: string
-  costo: string
+  cantidad: string | number
+  costo: string | number
 }
 
-const insumos: InsumoRow[] = [
-  {
-    id: 1,
-    nombre: 'ACRILICO POLVO RAPIDO ROSA NO.R2V (AUTOCURABLE) 90 GR',
-    codigo: '#O0679',
-    categoria: 'NIC TONE',
-    cantidad: '1',
-    costo: '$214.16',
-  },
-  {
-    id: 2,
-    nombre: 'BANDA SENCILLA INFERIOR DERECHO 12',
-    codigo: '#M1526',
-    categoria: 'AMERICAN ORTHODONTICS',
-    cantidad: '1',
-    costo: '$11.42',
-  },
-  {
-    id: 3,
-    nombre: 'TIRAS DE CELULOIDE (50 PZS)',
-    codigo: '#M1706',
-    categoria: 'ABC DENTAL',
-    cantidad: '1',
-    costo: '$7.77',
-  },
-  {
-    id: 4,
-    nombre: 'GRAPA #8A -RDCM8A-.',
-    codigo: '#I0896',
-    categoria: 'HU-FRIEDY',
-    cantidad: '1',
-    costo: '$162.69',
-  },
-  {
-    id: 5,
-    nombre: 'ARCO NITI .016 X .022 INF. PZA. 381-170.',
-    codigo: '#M5207',
-    categoria: 'TP ORTHODONTICS',
-    cantidad: '1',
-    costo: '$31.67',
-  },
-  {
-    id: 6,
-    nombre: '108.067 TRANSFER SF CUBETA ABIERTA, TITANIUM, 4.1 MM',
-    codigo: '#I2535',
-    categoria: 'NEODENT',
-    cantidad: '1',
-    costo: '$189.80',
-  },
-  {
-    id: 7,
-    nombre: 'TIJERA GOLDMAN FOX RECTA',
-    codigo: '#M6111',
-    categoria: 'ARAIN',
-    cantidad: '1',
-    costo: '$33.15',
-  },
-  {
-    id: 8,
-    nombre: 'BANDA SENCILLA INFERIOR IZQUIERDA 9',
-    codigo: '#M0646',
-    categoria: 'AMERICAN ORTHODONTICS',
-    cantidad: '1',
-    costo: '$10.67',
-  },
-  {
-    id: 9,
-    nombre: 'GUTAPERCHA EXTRA FINE',
-    codigo: '#I1063',
-    categoria: 'HYGENIC',
-    cantidad: '100',
-    costo: '$154.41',
-  },
-  {
-    id: 10,
-    nombre: 'BANDA TUBO TRIPLE SUPERIOR IZQUIERDA 31+',
-    codigo: '#M0605',
-    categoria: '3M UNITEK',
-    cantidad: '1',
-    costo: '$48.48',
-  },
-]
+type InsumosProps = {
+  insumos: InsumoRow[]
+  total: number
+  page: number
+  lastPage: number
+  nombre?: string | null
+  codigo?: string | null
+}
 
-export default function Insumos() {
+const PER_PAGE = 10
+
+export default function Insumos({ insumos, total, page, lastPage, nombre, codigo }: InsumosProps) {
+  const router = useRouter()
+  const first = (page - 1) * PER_PAGE + 1
+  const last = Math.min(page * PER_PAGE, total)
+
+  const windowStart = Math.max(1, page - 2)
+  const windowEnd = Math.min(lastPage, windowStart + 4)
+  const pages = Array.from({ length: windowEnd - windowStart + 1 }, (_, i) => windowStart + i)
+
+  const formatMoney = (value: string | number | null) => {
+    if (value === null || value === undefined) return ''
+    const n = typeof value === 'string' ? Number(value) : value
+    return Number.isFinite(n) ? `$${n.toFixed(2)}` : value
+  }
+
+  const filters = (extra: Record<string, string | number>) => {
+    const qs: Record<string, string | number> = { ...extra }
+    if (nombre) qs.nombre = nombre
+    if (codigo) qs.codigo = codigo
+    return qs
+  }
+
+  const search = (form: HTMLFormElement) => {
+    const data = new FormData(form)
+    const qs: Record<string, string> = {}
+    const termNombre = String(data.get('nombre') ?? '').trim()
+    const termCodigo = String(data.get('codigo') ?? '').trim()
+    if (termNombre) qs.nombre = termNombre
+    if (termCodigo) qs.codigo = termCodigo
+    router.get({ route: 'insumos', qs })
+  }
+
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    search(event.currentTarget)
+  }
+
+  /**
+   * Con dos campos de texto y sin botón submit, el navegador NO dispara el
+   * "implicit submission" al presionar Enter, así que lo manejamos a mano.
+   */
+  const handleKeyDown = (event: KeyboardEvent<HTMLFormElement>) => {
+    if (event.key !== 'Enter') return
+    event.preventDefault()
+    search(event.currentTarget)
+  }
+
   return (
     <div className="skus-page">
       <div className="skus-topbar">
@@ -104,16 +80,26 @@ export default function Insumos() {
         </div>
       </div>
 
-      <div className="skus-toolbar insumos-toolbar">
+      <form
+        className="skus-toolbar insumos-toolbar"
+        onSubmit={handleSearch}
+        onKeyDown={handleKeyDown}
+        autoComplete="off"
+      >
         <label className="skus-search">
           <Icon name="search" size={16} />
-          <input type="search" placeholder="Buscar Nombre" />
+          <input
+            type="search"
+            name="nombre"
+            placeholder="Buscar Nombre"
+            defaultValue={nombre ?? ''}
+          />
         </label>
         <label className="skus-search">
           <Icon name="search" size={16} />
-          <input type="search" placeholder="Buscar ID" />
+          <input type="search" name="codigo" placeholder="Buscar ID" defaultValue={codigo ?? ''} />
         </label>
-      </div>
+      </form>
 
       <div className="skus-card">
         <table className="sku-table">
@@ -134,7 +120,7 @@ export default function Insumos() {
                 </td>
                 <td className="sku-cell">{insumo.categoria}</td>
                 <td className="sku-cell">{insumo.cantidad}</td>
-                <td className="sku-cell">{insumo.costo}</td>
+                <td className="sku-cell">{formatMoney(insumo.costo)}</td>
               </tr>
             ))}
           </tbody>
@@ -147,22 +133,48 @@ export default function Insumos() {
             Ultima actualización 14/07 10:59
           </span>
           <div className="sku-pagination">
-            <span>1-10 de 5,033</span>
-            <button type="button" className="page-btn" aria-label="Página anterior">
-              <Icon name="chevronLeft" size={16} />
-            </button>
-            {[1, 2, 3, 4, 5].map((page) => (
-              <button
-                key={page}
-                type="button"
-                className={page === 1 ? 'page-btn active' : 'page-btn'}
+            <span>
+              {first}-{last} de {total.toLocaleString('en-US')}
+            </span>
+            {page > 1 ? (
+              <Link
+                className="page-btn"
+                route="insumos"
+                qs={filters({ page: page - 1 })}
+                aria-label="Página anterior"
               >
-                {page}
+                <Icon name="chevronLeft" size={16} />
+              </Link>
+            ) : (
+              <button type="button" className="page-btn" aria-label="Página anterior" disabled>
+                <Icon name="chevronLeft" size={16} />
               </button>
-            ))}
-            <button type="button" className="page-btn" aria-label="Página siguiente">
-              <Icon name="chevronRight" size={16} />
-            </button>
+            )}
+            {pages.map((p) =>
+              p === page ? (
+                <button key={p} type="button" className="page-btn active">
+                  {p}
+                </button>
+              ) : (
+                <Link key={p} className="page-btn" route="insumos" qs={filters({ page: p })}>
+                  {p}
+                </Link>
+              )
+            )}
+            {page < lastPage ? (
+              <Link
+                className="page-btn"
+                route="insumos"
+                qs={filters({ page: page + 1 })}
+                aria-label="Página siguiente"
+              >
+                <Icon name="chevronRight" size={16} />
+              </Link>
+            ) : (
+              <button type="button" className="page-btn" aria-label="Página siguiente" disabled>
+                <Icon name="chevronRight" size={16} />
+              </button>
+            )}
           </div>
         </footer>
       </div>

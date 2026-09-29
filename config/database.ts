@@ -1,4 +1,5 @@
 import app from '@adonisjs/core/services/app'
+import env from '#start/env'
 import { defineConfig } from '@adonisjs/lucid'
 
 const dbConfig = defineConfig({
@@ -37,6 +38,46 @@ const dbConfig = defineConfig({
          */
         paths: ['database/migrations'],
       },
+    },
+
+    /**
+     * Supabase connection (PostgreSQL).
+     * Lectura del catálogo (insumos, y futuras tablas) creado en Supabase.
+     *
+     * - Solo lectura: `migrations` va vacío, las tablas ya existen en Supabase
+     *   y NUNCA debes ejecutar `node ace migration:run --connection=supabase`.
+     * - Requiere SSL (Supabase no acepta conexiones sin cifrar). El valor de
+     *   SUPABASE_DB_URL se define en .env con el connection string del proyecto.
+     * - `searchPath`: las tablas del catálogo se resuelven primero en el schema
+     *   `dev` y, si no existen ahí, en `public`. Knex lo convierte en
+     *   `set search_path to 'dev','public'` al abrir cada conexión, así que
+     *   aplica a todos los modelos sin tener que declarar el schema en cada uno.
+     *   Si una tabla futura vive en otro schema, quita el fallback `public` o
+     *   usa `static schema` en ese modelo.
+     * - Alternativa: el pooler transaccional de Supabase usa el puerto 6543.
+     */
+    supabase: {
+      client: 'pg',
+
+      connection: {
+        connectionString: env.get('SUPABASE_DB_URL'),
+        ssl: { rejectUnauthorized: false },
+      },
+
+      /**
+       * Schema por defecto: `dev` primero, `public` como fallback. Lucid lo
+       * pasa a knex, que ejecuta `set search_path to 'dev','public'` al abrir
+       * cada conexión, así que todos los modelos resuelven contra `dev` sin
+       * declarar el schema uno por uno.
+       */
+      searchPath: ['dev', 'public'],
+
+      migrations: {
+        naturalSort: true,
+        paths: [],
+      },
+
+      debug: app.inDev,
     },
 
     /**

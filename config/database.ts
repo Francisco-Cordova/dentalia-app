@@ -71,7 +71,7 @@ const dbConfig = defineConfig({
      *   `keepAliveInitialDelayMillis` detecta el socket muerto pronto, y el pool
      *   con `idleTimeoutMillis` bajo recicla antes de que el servidor lo corte.
      *   Aun así la primera consulta tras un corte puede fallar; por eso el
-     *   controller reintenta una vez (ver app/utils/with_connection_retry.ts).
+     *   controller reintenta una vez (ver app/services/with_connection_retry.ts).
      */
     supabase: {
       client: 'pg',

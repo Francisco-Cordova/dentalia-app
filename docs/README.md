@@ -45,19 +45,71 @@ Esta carpeta es la **fuente de verdad documental**. Los documentos deben evoluci
 
 | Documento | Estado |
 |---|---|
-| [00-project/](00-project/) | DRAFT |
-| [01-requirements/](01-requirements/) | ANALYZED — RF/BR/AC de `AUT` e `INS` redactados; falta el resto de módulos |
-| [02-functional-design/](02-functional-design/) | ANALYZED — módulos, roles y 2 flujos; faltan flujos de los módulos restantes |
+| [00-project/](00-project/) | ANALYZED — brief, alcance, glosario y stakeholders reconstruidos a partir del código; sin validación de negocio |
+| [01-requirements/](01-requirements/) | ANALYZED — RF/BR/AC de `AUT` e `INS` redactados; los otros 6 módulos registrados en [modulos-pendientes.md](01-requirements/modulos-pendientes.md) con sus preguntas bloqueantes |
+| [02-functional-design/](02-functional-design/) | ANALYZED — módulos, roles y 2 flujos; los 6 módulos restantes no tienen flujo porque no tienen comportamiento |
 | [03-architecture/](03-architecture/) | ANALYZED — contexto, contenedores, integraciones, vista de arquitectura y 6 ADR |
 | [04-database/](04-database/) | ANALYZED — diseño, diccionario, ER, migraciones y respaldo |
 | [05-api/](05-api/) | ANALYZED — frontera Inertia (no hay API REST); contratos, errores y guías |
 | [06-security/](06-security/) | ANALYZED — 34 requisitos (SEC-001..SEC-034), auth, autorización, auditoría, datos, roles y secretos |
 | [07-development/](07-development/) | ANALYZED — entorno, guías, git, estándares, DoD y checklist |
 | [08-quality/](08-quality/) | ANALYZED — estrategia, casos y niveles de prueba; sin automatización implementada |
-| [09-infrastructure/](09-infrastructure/) | DRAFT |
-| [10-operations/](10-operations/) | DRAFT |
-| [features/](features/) | ANALYZED — FEATURE-001 y FEATURE-002 en `DONE`; FEATURE-003…008 reservadas |
+| [09-infrastructure/](09-infrastructure/) | ANALYZED — no existe infraestructura; infraestructura, ambientes, deployment, backup, DR y monitoreo documentados como inventario de lo ausente |
+| [10-operations/](10-operations/) | ANALYZED — sin proceso de incidentes; runbook y troubleshooting derivados del código, con rollback sin probar |
+| [features/](features/) | ANALYZED — FEATURE-001 y FEATURE-002 en `DONE` sin UAT; FEATURE-003…008 reservadas |
 
 ## Estados de trabajo
 
 `DRAFT → ANALYZED → READY → IN DEVELOPMENT → CODE REVIEW → QA → UAT → DONE`
+
+## Método: as-built, no as-designed
+
+Cada documento describe **lo que el código hace**, verificado. Lo que el sistema *debería* hacer y
+no hace está en la sección `## Brechas` de cada documento, nunca en el cuerpo como si estuviera
+implementado.
+
+| Regla | Por qué |
+|---|---|
+| Nada de requisitos, cifras ni capacidades inventadas | Un documento que describe un sistema inexistente es peor que uno vacío |
+| Las brechas van declaradas, no disimuladas | Son la información más útil de esta documentación |
+| Un documento de plantilla se rellena o se explica por qué no | No se dejan plantillas a medio hacer |
+
+### Estado real del proyecto, en una frase
+
+El panel funciona para lo único que tiene datos —el catálogo de insumos— con autenticación por
+enlace mágico verificada; las otras seis secciones del panel son maquetas sin fuente de datos; y no
+existe infraestructura, despliegue, pruebas ni proceso de incidentes.
+
+### Lo que sigue pendiente, en orden
+
+| Prioridad | Pendencia | Dónde está documentada |
+|---|---|---|
+| 1 | Decidir quién da de alta a los usuarios | [stakeholders.md](00-project/stakeholders.md) · [modulos-pendientes.md](01-requirements/modulos-pendientes.md) |
+| 2 | Definir dónde viven los datos de SKU, familias, kits, zonas y módulos de salud | [modulos-pendientes.md](01-requirements/modulos-pendientes.md) |
+| 3 | Decidir si el autoregistro de `POST /signup` es funcionalidad o residuo | [scope.md](00-project/scope.md) |
+| 4 | Resolver el bloqueo de infraestructura: `tmp/db.sqlite3` impide desplegar | [environments.md](09-infrastructure/environments.md) |
+| 5 | Respaldar `tmp/db.sqlite3`, hoy irrecuperable | [backup-policy.md](09-infrastructure/backup-policy.md) |
+| 6 | Escribir el primer test: la lógica con más riesgo es `escapeLike()` | [test-strategy.md](08-quality/test-strategy.md) |
+| 7 | Capturar las plantillas de SKUs e Insumos | [features/README.md](features/README.md) |
+| 8 | Validar el alcance con negocio | [product-brief.md](00-project/product-brief.md) |
+
+## Cobertura documental
+
+| Sección | Documentos | Con `## Brechas` |
+|---|---|---|
+| `00-project` | 4 | 4 |
+| `01-requirements` | 6 | 6 |
+| `02-functional-design` | 4 | 4 |
+| `03-architecture` | 4 + 6 ADR + plantilla | 4 |
+| `04-database` | 6 | 4 |
+| `05-api` | 5 | 5 |
+| `06-security` | 7 | 5 |
+| `07-development` | 6 | 4 |
+| `08-quality` | 7 | 7 |
+| `09-infrastructure` | 6 | 6 |
+| `10-operations` | 4 | 4 |
+| `features` | 3 | 3 |
+
+Los documentos sin `## Brechas` son plantillas (`FLOW-000-template.md`, `ADR-000-template.md`,
+`FEATURE-000-template.md`), los índices de sección y los ADR, que en su lugar tienen la sección
+`## Revisión`.

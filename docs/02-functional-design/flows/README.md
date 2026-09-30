@@ -11,11 +11,12 @@ Crear un archivo por flujo relevante. Incluir actor, precondiciones, flujo princ
 |---|---|---|---|
 | [FLOW-AUT-001](FLOW-AUT-001.md) | Acceso al panel mediante enlace de un solo uso | RF-AUT-001, RF-AUT-002, RF-AUT-003 | ANALYZED |
 | [FLOW-INS-001](FLOW-INS-001.md) | Consultar el catálogo de insumos | RF-INS-001 … RF-INS-005 | ANALYZED |
+| [FLOW-KIT-001](FLOW-KIT-001.md) | Consultar el catálogo de kits | RF-KIT-001 … RF-KIT-006 | ANALYZED |
 
 ## Por qué no hay más flujos
 
-Solo hay dos porque solo hay dos módulos con comportamiento. Los otros seis pantallas
-(`SKU`, `FAM`, `KIT`, `USR`, `ZON`, `MSD`) importan arrays literales desde el propio `.tsx`: sin
+Solo hay tres porque solo hay tres módulos con comportamiento. Los otros cinco pantallas
+(`SKU`, `FAM`, `USR`, `ZON`, `MSD`) importan arrays literales desde el propio `.tsx`: sin
 modelo, sin migración y sin controller **no hay flujo que documentar**, solo un render estático.
 
 Documentar un "alta de SKU" cuando no existe un modelo de SKU sería inventar funcionalidad. Las
@@ -30,7 +31,7 @@ Al abrir la feature correspondiente:
 |---|---|---|
 | Alta y edición de SKU | RF-SKU-* | Decidir dónde viven los datos y quién escribe |
 | Alta de familia | RF-FAM-* | Definir qué es una familia y su relación con los insumos |
-| Alta de kit | RF-KIT-* | Definir si el precio se calcula o se fija |
+| Alta de kit | RF-KIT-* | El precio ya se resolvió: es una columna almacenada, no se calcula. Falta decidir quién escribe y qué tabla relaciona cada kit con sus insumos |
 | Edición de usuarios | RF-USR-* | **Decidir quién da de alta a los usuarios**: es el bloqueo principal |
 | Alta de zona | RF-ZON-* | Definir si las zonas filtran el catálogo |
 | Alta de módulo de salud | RF-MSD-* | Definir el concepto en el negocio |
@@ -44,7 +45,7 @@ flujo en la tabla de arriba y en
 
 ## Brechas
 
-- **Seis módulos sin flujo**: `SKU`, `FAM`, `KIT`, `USR`, `ZON` y `MSD` no tienen flujo porque no
+- **Cinco módulos sin flujo**: `SKU`, `FAM`, `USR`, `ZON` y `MSD` no tienen flujo porque no
   tienen comportamiento, no porque falte documentación.
 - **`POST /signup` no tiene flujo documentado ni requisito**: es una ruta activa que crea cuentas e
   inicia sesión sin verificar el correo, y no está enlazada desde la interfaz. Nadie ha decidido si

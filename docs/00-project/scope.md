@@ -37,7 +37,7 @@ de datos**:
 | Página | Datos |
 |---|---|
 | `/insumos` | **Reales** (Supabase, solo lectura) |
-| `/skus`, `/familias`, `/kits`, `/zonas`, `/modulos-de-salud`, `/usuarios` | Arrays hardcodeados en el propio `.tsx` |
+| `/skus`, `/familias`, `/zonas`, `/modulos-de-salud`, `/usuarios` | Arrays hardcodeados en el propio `.tsx` |
 
 Están en alcance como **interfaz**. No lo están como funcionalidad: mover un slider, paginar o
 buscar en ellas no cambia nada porque no hay consulta.

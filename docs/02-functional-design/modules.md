@@ -62,7 +62,7 @@ fronteras son observables en el código.
 
 **No es responsable de**
 - Escrituras, altas o ediciones de insumos: el catálogo es externo y de solo lectura.
-- SKU, familias, kits, zonas, módulos de salud y usuarios: son pantallas maqueta sin conexión a datos.
+- SKU, familias, zonas, módulos de salud y usuarios: son pantallas maqueta sin conexión a datos.
 - Caché del catálogo: cada visita a `/insumos` vuelve a Supabase.
 
 **Dependencias**
@@ -78,6 +78,36 @@ fronteras son observables en el código.
 | `app/services/with_connection_retry.ts` | Reintento único ante error de conexión |
 | `inertia/pages/insumos.tsx` | Tabla, buscadores, paginación |
 | `config/database.ts` | Conexión `supabase` (searchPath, pool, keepAlive) |
+
+---
+
+## Catálogo de kits (`KIT`)
+
+**Objetivo:** listar los kits del catálogo con paginación, búsqueda por nombre e identificador,
+el conteo de insumos que los componen y su costo.
+
+**Responsabilidades**
+- Leer `dev."Kits"` de Supabase en bloques de 10, ordenados por `id`.
+- Calcular el conteo de insumos a partir de la columna `"Insumos"`, que es una lista de códigos
+  separados por coma y no un número (`app/controllers/kits_controller.ts`).
+- Presentar el costo como moneda y el identificador con prefijo `#`.
+- Presentar la tabla, los buscadores y la paginación (`inertia/pages/kits.tsx`).
+
+**No es responsable de**
+- Escrituras: el modal "Nuevo kit" y el botón de acciones son maqueta, no hay ruta que escriba.
+- El detalle de los insumos de un kit: no existe todavía la tabla de relación.
+- La fecha de "última actualización", que sigue estática.
+
+**Dependencias**
+- Las mismas que el catálogo de insumos: conexión `supabase`, `withConnectionRetry()`.
+
+**Archivos**
+
+| Archivo | Rol |
+|---|---|
+| `app/models/kit.ts` | Modelo Lucid sobre `supabase."Kits"` |
+| `app/controllers/kits_controller.ts` | Filtros `nombre`/`codigo`, conteo de insumos, paginación y render |
+| `inertia/pages/kits.tsx` | Tabla, buscadores, paginación, modal maqueta |
 
 ---
 
@@ -106,6 +136,7 @@ fronteras son observables en el código.
 ## Brechas
 
 - **No existe módulo de autorización**: `roles-permissions`, policies y abilities están vacíos; el control de acceso es binario.
-- **No existe módulo de catálogo para el resto del dominio**: SKU, familias, kits, zonas, módulos de salud y usuarios viven como páginas que importan arrays hardcodeados. Cada uno necesitará su módulo al pasar a datos reales.
+- **No existe módulo de catálogo para el resto del dominio**: SKU, familias, zonas, módulos de salud y usuarios viven como páginas que importan arrays hardcodeados. Cada uno necesitará su módulo al pasar a datos reales.
+- El catálogo de insumos y el de kits comparten forma y conexión, pero están duplicados como módulos independientes; no hay una abstracción común de catálogo.
 - **No existe módulo de API**: `providers/api_provider.ts` y el registro de Tuyau están montados, pero ninguna ruta devuelve JSON.
 - Los límites entre módulos se apoyan en convención (rutas en `start/routes.ts`, alias `#models/*`, `#services/*`) y no en una capa de dominio o casos de uso.

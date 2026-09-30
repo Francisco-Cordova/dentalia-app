@@ -56,7 +56,7 @@ módulos de salud) pero no corresponde a ningún permiso: es un regrouping visua
 | `INS` | Catálogo de insumos | **Funcional** | Supabase `dev."Insumos"` |
 | `SKU` | SKUs | Maqueta (array en el `.tsx`) | Ninguno |
 | `FAM` | Familias | Maqueta | Ninguno |
-| `KIT` | Kits de insumos | Maqueta | Ninguno |
+| `KIT` | Kits de insumos | FEATURE-005 `READY` | `dev."Kits"` (40 filas) |
 | `ZON` | Zonas | Maqueta | Ninguno |
 | `MSD` | Módulos de salud | Maqueta | Ninguno |
 | `USR` | Usuarios | Maqueta | Ninguno |

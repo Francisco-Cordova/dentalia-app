@@ -27,16 +27,16 @@ Copiar `FEATURE-000-template.md`, asignar ID y completar el checklist `Ready for
 | [FEATURE-002](FEATURE-002-autenticacion-magic-link.md) | Autenticación por enlace mágico | DONE | RF-AUT-001 … RF-AUT-003 |
 | FEATURE-003 | SKUs | DRAFT | RF-SKU-001 (reservado) |
 | FEATURE-004 | Familias | DRAFT | RF-FAM-001 (reservado) |
-| FEATURE-005 | Kits de insumos | DRAFT | RF-KIT-001 (reservado) |
+| [FEATURE-005](FEATURE-005-kits-de-insumos.md) | Kits de insumos | READY | RF-KIT-001 … RF-KIT-006 |
 | FEATURE-006 | Usuarios | DRAFT | RF-USR-001 (reservado) |
 | FEATURE-007 | Zonas | DRAFT | RF-ZON-001 (reservado) |
 | FEATURE-008 | Módulos de salud | DRAFT | RF-MSD-001 (reservado) |
 
 ## Identificadores reservados
 
-`FEATURE-003` a `FEATURE-008` están **reservados**: los documentos aún no existen. Se redactarán
-copiando `FEATURE-000-template.md` cuando se aborde cada módulo, tomando como referencia de
-diseño el HTML correspondiente en `Plantillas/`.
+`FEATURE-003`, `FEATURE-004`, `FEATURE-006` a `FEATURE-008` están **reservados**: los documentos aún
+no existen. Se redactarán copiando `FEATURE-000-template.md` cuando se aborde cada módulo,
+tomando como referencia de diseño el HTML correspondiente en `Plantillas/`.
 
 Para esas features, la prioridad natural es: **convertir cada pantalla maqueta en lectura real**,
 empezando por los buscadores y la paginación, que hoy son controles sin comportamiento.

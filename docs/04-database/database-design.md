@@ -48,6 +48,7 @@ El catálogo vive en PostgreSQL porque ya existe allí y no se replica (ver
 | `users` | sqlite | Persona con sesión. Solo email, nombre opcional y hash de contraseña. Creada por el seeder o por `POST /signup` |
 | `magic_links` | sqlite | Token de un solo uso hasheado, ligado a `user_id`, con expiración (30 min) y `used_at` |
 | `dev."Insumos"` | supabase | Catálogo de insumos del proveedor: nombre, código, marca, cantidad y costo |
+| `dev."Kits"` | supabase | Catálogo de kits: nombre, código de Odoo, costo, descripción y la lista de insumos que lo componen |
 | `adonis_schema` / `adonis_schema_versions` | sqlite | Contabilidad interna de migraciones (Lucid). No es dominio |
 
 ## Relaciones y cardinalidad
@@ -57,8 +58,14 @@ El catálogo vive en PostgreSQL porque ya existe allí y no se replica (ver
   enlaces pendientes. Es la única FK de la aplicación.
 - `magic_links` **no** guarda el correo: se llega al usuario por la relación. Por eso un correo no
   registrado no genera fila (el flujo corta antes de crear el enlace).
-- `dev."Insumos"` es una entidad **independiente** sin FKs a otras tablas de la aplicación. El resto
-  del catálogo —SKUs, familias, kits— **no está modelado todavía**.
+- `dev."Insumos"` es una entidad **independiente** sin FKs a otras tablas de la aplicación.
+- `dev."Kits"` también es independiente: **no hay FK entre `Kits` e `Insumos`**. La relación se
+  codifica dentro del propio texto de `"Insumos"`, como una lista de `DEFAULT_CODE` separados por
+  coma. Consecuencia: no se puede validar en la base que un código exista, ni saber la cantidad de
+  cada insumo. El resto del catálogo —SKUs, familias— **no está modelado todavía**.
+- `public."Kits"` es una tabla distinta de `dev."Kits"`: una fila por par kit×insumo, con
+  `id_kit`, `id_insumo`, `Cantidad requerida numero`, `Costo unitario` y `Usos`. Contiene la
+  información de detalle que `dev."Kits"` no tiene. La aplicación no la consulta todavía.
 
 ## Constraints (verificadas contra `tmp/db.sqlite3`)
 
@@ -128,14 +135,14 @@ pequeños.
   (no hay worker ni job) y sin índice que lo haga barato.
 - **`magic_links.user_id` es nullable**: el esquema lo permite aunque la aplicación siempre lo
   escriba. Nada impide un enlace huérfano por inserción directa.
-- **Los 7 esquemas restantes del catálogo no están modelados** (SKUs, familias, kits, usuarios de
-  negocio, zonas, módulos de salud): solo existe `dev."Insumos"`.
+- **Los esquemas restantes del catálogo no están modelados** (SKUs, familias, usuarios de
+  negocio, zonas, módulos de salud): solo existen `dev."Insumos"` y `dev."Kits"`.
 - **No hay réplicas ni caché**: cada lectura va a la fuente primaria (ver [ADR-004](../03-architecture/adr/ADR-004-catalogo-solo-lectura.md)).
 - El store `database` de sesión está declarado en `config/session.ts` pero **no es funcional**
   (falta la tabla `sessions`): un cambio de `SESSION_DRIVER` a `database` rompería el arranque.
 - Sin particionado ni retención; no es necesario al volumen actual.
-- El conteo de ~5,060 filas del catálogo proviene de `AGENTS.md` y **no se reverificó** en esta
-  tanda; la cifra exacta debe confirmarse con `SELECT count(*)` antes de usarla como línea base.
+- El conteo de 5,060 filas de `dev."Insumos"` y de 40 de `dev."Kits"` quedó **verificado** el
+  2026-09-30 con `SELECT count(*)`.
 
 ## Referencias
 - [Diccionario de datos](data-dictionary.md)

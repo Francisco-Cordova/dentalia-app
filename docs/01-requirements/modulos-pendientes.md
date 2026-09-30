@@ -12,7 +12,7 @@
 ## Propósito
 
 Este documento **cierra la brecha** que el índice señalaba como "falta el resto de módulos", sin
-inventar requisitos. Los seis módulos restantes **no se especifican aquí porque no se pueden
+inventar requisitos. Los módulos restantes **no se especifican aquí porque no se pueden
 especificar**: sus pantallas existen, pero no hay sistema detrás del que derivar comportamiento.
 
 Escribir un requisito para "buscar un SKU" cuando el buscador no consulta nada sería documentar una
@@ -27,7 +27,7 @@ y listar **qué hace falta saber** para poder especificarlas.
 | `INS` | Catálogo de insumos | `/insumos` | Real | RF-INS-001…005 | FEATURE-001 `DONE` |
 | `SKU` | SKUs | `/skus` | Maqueta | RF-SKU-001 *reservado* | FEATURE-003 `DRAFT` |
 | `FAM` | Familias | `/familias` | Maqueta | RF-FAM-001 *reservado* | FEATURE-004 `DRAFT` |
-| `KIT` | Kits de insumos | `/kits` | Maqueta | RF-KIT-001 *reservado* | FEATURE-005 `DRAFT` |
+| `KIT` | Kits de insumos | `/kits` | Real | RF-KIT-001…006 | FEATURE-005 `READY` |
 | `USR` | Usuarios | `/usuarios` | Maqueta | RF-USR-001 *reservado* | FEATURE-006 `DRAFT` |
 | `ZON` | Zonas | `/zonas` | Maqueta | RF-ZON-001 *reservado* | FEATURE-007 `DRAFT` |
 | `MSD` | Módulos de salud | `/modulos-de-salud` | Maqueta | RF-MSD-001 *reservado* | FEATURE-008 `DRAFT` |
@@ -36,11 +36,11 @@ y listar **qué hace falta saber** para poder especificarlas.
 
 | Motivo | Evidencia |
 |---|---|
-| Las páginas importan arrays literales desde el propio `.tsx` | `inertia/pages/skus.tsx`, `familias.tsx`, `kits.tsx`, `zonas.tsx`, `modulos_de_salud.tsx`, `usuarios.tsx` |
-| No hay modelo Lucid para ninguno | `app/models/` solo tiene `user.ts`, `magic_link.ts`, `insumo.ts` |
+| Las páginas importan arrays literales desde el propio `.tsx` | `inertia/pages/skus.tsx`, `familias.tsx`, `zonas.tsx`, `modulos_de_salud.tsx`, `usuarios.tsx` |
+| No hay modelo Lucid para ninguno | `app/models/` tiene `user.ts`, `magic_link.ts`, `insumo.ts`, `kit.ts` |
 | No hay migración que cree sus tablas | `database/migrations/` solo tiene `users` y `magic_links` |
-| No hay controller | `app/controllers/` solo tiene `insumos`, `magic_link`, `new_account`, `session` |
-| Los buscadores y la paginación son controles sin comportamiento | Solo `/insumos` conecta su `onKeyDown` y su paginación |
+| No hay controller | `app/controllers/` tiene `insumos`, `kits`, `magic_link`, `new_account`, `session` |
+| Los buscadores y la paginación son controles sin comportamiento | Solo `/insumos` y `/kits` conectan su `onKeyDown` y su paginación |
 | No hay reglas de negocio conocidas | No existe un documento de negocio en el repositorio |
 
 ## Qué hay que saber para especificar cada módulo
@@ -67,11 +67,18 @@ Preguntas bloqueantes. Mientras no se respondan, el requisito no se puede redact
 
 ### `KIT` · FEATURE-005
 
-| # | Pregunta |
-|---|---|
-| 1 | ¿Un kit es una lista de insumos con cantidad fija, o un producto con precio propio? |
-| 2 | ¿El precio del kit se calcula sumando los componentes o se define aparte? |
-| 3 | ¿Cambiar el precio de un insumo cambia el del kit? |
+Estas preguntas ya no bloquean la lectura del catálogo: `dev."Kits"` existe en Supabase y
+[FEATURE-005](../features/FEATURE-005-kits-de-insumos.md) cubre el listado. Dos quedaron
+respondidas por el propio dato:
+
+| # | Pregunta | Estado |
+|---|---|---|
+| 1 | ¿Un kit es una lista de insumos con cantidad fija, o un producto con precio propio? | **A medias.** `dev."Kits"."Insumos"` guarda códigos sueltos, sin cantidad. La cantidad por insumo solo existe en `public."Kits"."Cantidad requerida numero"`, que la app aún no consulta |
+| 2 | ¿El precio del kit se calcula sumando los componentes o se define aparte? | **Respondida: se define aparte.** `Costo` es una columna `real` almacenada e independiente de la lista de insumos |
+| 3 | ¿Cambiar el precio de un insumo cambia el del kit? | **Abierta.** El dato sugiere que no (el costo está desacoplado), pero es una decisión de negocio |
+
+Lo que sigue pendiente para `KIT` es la **escritura**: quién crea kits, si habrá edición, y qué
+tabla relaciona cada kit con sus insumos y en qué cantidad.
 
 ### `USR` · FEATURE-006
 
@@ -99,7 +106,7 @@ Preguntas bloqueantes. Mientras no se respondan, el requisito no se puede redact
 | 2 | ¿Se relaciona con las familias o es un eje independiente? |
 | 3 | ¿El HTML de `Plantillas/modulos de salud/` resuelve alguna de estas preguntas? No: son páginas estáticas |
 
-### Transversal a los seis
+### Transversal a los módulos sin datos
 
 | # | Pregunta |
 |---|---|
@@ -131,8 +138,9 @@ Mientras tanto, la regla de `features/README.md` sigue aplicando: **no implement
 
 ## Brechas
 
-- **Seis de ocho módulos de dominio sin requisito**: la brecha está declarada y con su causa
-  identificada, no cerrada de hecho.
+- **Cinco de ocho módulos de dominio sin requisito** (`SKU`, `FAM`, `USR`, `ZON`, `MSD`): la brecha
+  está declarada y con su causa identificada, no cerrada de hecho. `KIT` dejó de estar aquí: tiene
+  tabla, requisitos y lectura real, aunque su escritura sigue sin decidir.
 - **La pregunta sobre quién da de alta usuarios está sin respuesta desde el primer día**: sin ella,
   el producto no es utilizable por nadie ajeno a quien mantiene la base de datos.
 - **No hay documento de negocio**: todas las preguntas de este documento llevan a la misma raíz, que

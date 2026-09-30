@@ -116,8 +116,8 @@ Administrador autenticado.
   `app/services/with_connection_retry.ts`, `inertia/pages/insumos.tsx`, `config/database.ts`.
 - Verificaciones: `npm run lint` y `npm run typecheck` sin errores; `GET /insumos` con sesión
   devuelve 200 con las 10 filas de la página 1.
-- **El total ~5,060 no se reverificó en esta tanda**: viene de `AGENTS.md`. Antes de usarlo como
-  línea base en un documento de volumen, confirmar con `SELECT count(*) FROM dev."Insumos"`.
+- El total ~5,060 **quedó verificado** el 2026-09-30 con
+  `SELECT count(*) FROM dev."Insumos"` → 5,060. `public."Insumos"` también tiene 5,060.
 
 ## Brechas
 - `Ordenar` y "Última actualización" son estáticos en la UI pese a existir `modified_at`.

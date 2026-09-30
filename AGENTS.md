@@ -45,7 +45,7 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
 | conexión | driver | uso | notas |
 |---|---|---|---|
 | `sqlite` (default) | better-sqlite3 | auth: `users`, `magic_links` | archivo `tmp/db.sqlite3` |
-| `supabase` | pg | catálogo (`Insumos`, y futuras tablas) | solo lectura, `searchPath: ['dev','public']` |
+| `supabase` | pg | catálogo (`Insumos`, `Kits`, y futuras tablas) | solo lectura, `searchPath: ['dev','public']` |
 
 - `supabase` es **secondary y read-only**: `migrations.paths: []`. Nunca
   `node ace migration:run --connection=supabase`; las tablas ya existen en Supabase.
@@ -75,11 +75,33 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
   `paginate()`.
 - Pendiente conocido: "Ordenar" y "Última actualización" son estáticos en la UI
   (`modified_at` sí existe para la fecha real).
+- Total verificado el 2026-09-30: `SELECT count(*) FROM dev."Insumos"` → 5,060.
+
+## Tabla Kits (`dev."Kits"`)
+
+- 40 filas, `id` **disperso entre 7 y 136** (los 1-6 no existen). Orden por `id` asc, no supongas
+  contigüidad. Columnas: `id`, `created_at`, `"Nombre"`, `"ID_odoo"`, `"Costo"`, `"Descripcion"`,
+  `"Insumos"`. El modelo `app/models/kit.ts` mapea a la UI `nombre`, `codigo`, `costo`,
+  `descripcion`, `insumosRaw`, `createdAt`.
+- **`"Insumos"` NO es un número**: es una lista de `DEFAULT_CODE` separados por coma
+  (`"M2625 , M1711 , M2203"`). La columna "Insumos" de la tabla muestra el **conteo**, que calcula
+  el controller partiendo por coma y recortando cada token. Hay 3 filas con `"Insumos"` en NULL
+  (conteo 0) y con `"Costo"` en NULL (la UI muestra `—`, no `$0.00`).
+- `public."Kits"` **no es un duplicado** como sí lo es `public."Insumos"`: es la tabla
+  desnormalizada de detalle (una fila por kit×insumo) con `id_kit`, `id_insumo`,
+  `Cantidad requerida numero`, `Costo unitario` y `Usos`. Ahí está la cantidad por insumo que
+  `dev."Kits"` no guarda. La app aún no la consulta.
+- Buscadores: "nombre" → `"Nombre"`, "ID" → `"ID_odoo"` (igual que Insumos, donde "ID" no filtra
+  el `ID` numérico). `ilike %term%` + `escapeLike()`. La UI muestra el código con prefijo `#`.
+- Pendiente conocido: "Ordenar" y "Última actualización" estáticos (decidido así por el usuario;
+  `created_at` existe). El modal "Nuevo kit" y el botón `···` son maqueta: **no hay ruta que
+  escriba** en kits.
 
 ## Rutas y auth
 
 - Páginas mock: `router.on('/x').renderInertia('x', {})`. Con datos:
-  `router.get('/insumos', [controllers.Insumos, 'index'])`.
+  `router.get('/insumos', [controllers.Insumos, 'index'])` o
+  `router.get('/kits', [controllers.Kits, 'index'])`.
 - Todo el admin está tras `middleware.auth()` (`start/routes.ts`); login es **magic link**
   (sin password). Para probar sin correo: en dev, si Mailtrap falla,
   `MagicLinkController` loguea `[MAGIC LINK DEV] <url>`; el token es de un solo uso y expira

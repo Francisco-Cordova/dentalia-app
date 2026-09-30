@@ -384,4 +384,18 @@ Si el primer y el segundo intento fallan, el error sube al handler y se renderiz
 - `BR-AUT-005` tiene una ventana de carrera (TOCTOU) entre comprobar y marcar el token como usado.
 - `BR-AUT-004` se cumple en el mensaje, pero se incumple implícitamente en el tiempo de respuesta.
 - No existe regla para el número máximo de enlaces vivos por usuario ni para su depuración.
-- No hay reglas de negocio definidas para las pantallas mock (SKU, familias, kits, usuarios, zonas, módulos de salud): se redactarán junto con sus features.
+- No hay reglas de negocio definidas para las pantallas mock (SKU, familias, usuarios, zonas, módulos de salud): se redactarán junto con sus features.
+
+## BR-KIT · Kits de insumos
+
+Definidas en
+[FEATURE-005](../features/FEATURE-005-kits-de-insumos.md). Resumen:
+
+- BR-KIT-001: los kits se leen de `dev."Kits"` en Supabase, solo lectura.
+- BR-KIT-002: la columna `"Insumos"` es una lista de códigos separados por coma; la columna
+  "Insumos" de la tabla muestra **cuántos** hay, no la lista.
+- BR-KIT-003: `Costo` se muestra con 2 decimales; si es nulo se muestra `—`, nunca `$0.00`.
+- BR-KIT-004: el `ID_odoo` se muestra con prefijo `#`.
+- BR-KIT-005: paginación de 10, orden ascendente por `id`.
+- BR-KIT-006: los buscadores usan `ILIKE` con `%` y `_` escapados.
+- BR-KIT-007: los filtros se conservan al cambiar de página.

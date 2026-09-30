@@ -28,7 +28,7 @@ router
     router.on('/skus').renderInertia('skus', {}).as('skus')
     router.on('/familias').renderInertia('familias', {}).as('familias')
     router.get('/insumos', [controllers.Insumos, 'index']).as('insumos')
-    router.on('/kits').renderInertia('kits', {}).as('kits')
+    router.get('/kits', [controllers.Kits, 'index']).as('kits')
     router.on('/usuarios').renderInertia('usuarios', {}).as('usuarios')
     router.on('/zonas').renderInertia('zonas', {}).as('zonas')
     router.on('/modulos-de-salud').renderInertia('modulos_de_salud', {}).as('modulosDeSalud')

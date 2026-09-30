@@ -59,11 +59,39 @@ erDiagram
         numeric UNIT_COST
         timestamp modified_at "no usada por la UI"
     }
+
+    KITS {
+        bigint id PK "7..136, disperso"
+        timestamptz created_at "no usada por la UI"
+        text Nombre "buscable"
+        text ID_odoo "buscable como ID"
+        real Costo "nullable: 3 filas NULL"
+        text Descripcion "leida, no mostrada"
+        text Insumos "lista de DEFAULT_CODE, no es un numero"
+    }
 ```
 
-`INSUMOS` es una **entidad aislada**: no tiene claves foráneas hacia otras tablas de la aplicación
-y no se relaciona con `USERS`. No hay forma de saber, desde este repositorio, con qué otras
-tablas del catálogo se enlaza (propiedad del equipo dueño de Supabase).
+### Sin relación entre `INSUMOS` y `KITS`
+No hay clave foránea. La composición de un kit se codifica **dentro del texto** de
+`KITS."Insumos"`, como códigos separados por coma:
+
+```mermaid
+flowchart LR
+    K["KITS id=7<br/>Insumos = 'M2625 , M1711 , M2203'"]
+    K -.->|"split por coma"| C1["INSUMOS DEFAULT_CODE = M2625"]
+    K -.-> C2["INSUMOS DEFAULT_CODE = M1711"]
+    K -.-> C3["INSUMOS DEFAULT_CODE = M2203"]
+    N1["(no hay cantidad)"]
+    K -.-> N1
+```
+
+La consecuencia es que no se puede validar desde la base que un código exista, ni conocer la
+cantidad de cada insumo. Esa información vive en `public."Kits"`, tabla desnormalizada con
+`id_kit`, `id_insumo` y `Cantidad requerida numero`, que la aplicación todavía no consulta.
+
+`INSUMOS` y `KITS` son **entidades aisladas**: no tienen claves foráneas hacia otras tablas de la
+aplicación y no se relacionan con `USERS`. No hay forma de saber, desde este repositorio, con qué
+otras tablas del catálogo se enlazan (propiedad del equipo dueño de Supabase).
 
 ## Entidades que NO existen en el modelo
 
@@ -71,7 +99,7 @@ tablas del catálogo se enlaza (propiedad del equipo dueño de Supabase).
 |---|---|---|
 | SKU | **No** | Pantalla `skus` con props `{}` |
 | Familia | **No** | Pantalla `familias` con props `{}` |
-| Kit de insumos | **No** | Pantalla `kits` con props `{}` |
+| Detalle de insumos por kit | **No** | Existe `public."Kits"` en Supabase (con cantidades), pero la app solo lee `dev."Kits"` |
 | Usuario de negocio (del catálogo) | **No** | `users` es solo auth; la pantalla `usuarios` está vacía |
 | Zona | **No** | Pantalla `zonas` con props `{}` |
 | Módulo de salud | **No** | Pantalla `modulos_de_salud` con props `{}` |

@@ -48,12 +48,12 @@ Esta carpeta es la **fuente de verdad documental**. Los documentos deben evoluci
 | [00-project/](00-project/) | DRAFT |
 | [01-requirements/](01-requirements/) | ANALYZED — RF/BR/AC de `AUT` e `INS` redactados; falta el resto de módulos |
 | [02-functional-design/](02-functional-design/) | ANALYZED — módulos, roles y 2 flujos; faltan flujos de los módulos restantes |
-| [03-architecture/](03-architecture/) | DRAFT |
-| [04-database/](04-database/) | DRAFT |
-| [05-api/](05-api/) | DRAFT |
-| [06-security/](06-security/) | DRAFT |
-| [07-development/](07-development/) | DRAFT |
-| [08-quality/](08-quality/) | DRAFT |
+| [03-architecture/](03-architecture/) | ANALYZED — contexto, contenedores, integraciones, vista de arquitectura y 6 ADR |
+| [04-database/](04-database/) | ANALYZED — diseño, diccionario, ER, migraciones y respaldo |
+| [05-api/](05-api/) | ANALYZED — frontera Inertia (no hay API REST); contratos, errores y guías |
+| [06-security/](06-security/) | ANALYZED — 34 requisitos (SEC-001..SEC-034), auth, autorización, auditoría, datos, roles y secretos |
+| [07-development/](07-development/) | ANALYZED — entorno, guías, git, estándares, DoD y checklist |
+| [08-quality/](08-quality/) | ANALYZED — estrategia, casos y niveles de prueba; sin automatización implementada |
 | [09-infrastructure/](09-infrastructure/) | DRAFT |
 | [10-operations/](10-operations/) | DRAFT |
 | [features/](features/) | ANALYZED — FEATURE-001 y FEATURE-002 en `DONE`; FEATURE-003…008 reservadas |

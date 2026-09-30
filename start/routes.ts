@@ -15,11 +15,11 @@ router
   .group(() => {
     router.get('/', [controllers.Session, 'create']).as('session.create')
 
-    router.get('signup', [controllers.NewAccount, 'create'])
-    router.post('signup', [controllers.NewAccount, 'store'])
+    router.get('signup', [controllers.NewAccount, 'create']).as('new_account.create')
+    router.post('signup', [controllers.NewAccount, 'store']).as('new_account.store')
 
-    router.post('login/magic', [controllers.MagicLink, 'send'])
-    router.get('auth/magic/:token', [controllers.MagicLink, 'verify'])
+    router.post('login/magic', [controllers.MagicLink, 'send']).as('magic_link.send')
+    router.get('auth/magic/:token', [controllers.MagicLink, 'verify']).as('magic_link.verify')
   })
   .use(middleware.guest())
 

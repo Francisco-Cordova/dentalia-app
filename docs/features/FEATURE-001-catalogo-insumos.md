@@ -103,7 +103,8 @@ Administrador autenticado.
 ## Definition of Done
 - [x] Implementación completa.
 - [x] Pruebas aprobadas (smoke manual: búsqueda, mayúsculas, paginación, recuperación por corte).
-- [x] Code Review aprobado.
+- [ ] Code Review aprobado — **no formalizado**: no hay proceso de review en el repositorio. La
+      revisión hecha fue documental y de código (esta tanda), no una aprobación trazable.
 - [ ] CI aprobado — **no disponible: el proyecto no tiene CI** (brecha).
 - [x] API/BD/docs actualizados (`01-requirements`, `02-functional-design`, `AGENTS.md`).
 - [ ] QA/UAT completado — **no aplica: no hay ambiente de pruebas**.
@@ -113,7 +114,10 @@ Administrador autenticado.
   `5b4f99b` (reconexión tras pérdida de sesión con la BD).
 - Archivos: `app/models/insumo.ts`, `app/controllers/insumos_controller.ts`,
   `app/services/with_connection_retry.ts`, `inertia/pages/insumos.tsx`, `config/database.ts`.
-- Verificaciones: `npm run lint` y `npm run typecheck` sin errores.
+- Verificaciones: `npm run lint` y `npm run typecheck` sin errores; `GET /insumos` con sesión
+  devuelve 200 con las 10 filas de la página 1.
+- **El total ~5,060 no se reverificó en esta tanda**: viene de `AGENTS.md`. Antes de usarlo como
+  línea base en un documento de volumen, confirmar con `SELECT count(*) FROM dev."Insumos"`.
 
 ## Brechas
 - `Ordenar` y "Última actualización" son estáticos en la UI pese a existir `modified_at`.

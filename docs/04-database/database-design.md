@@ -1,52 +1,144 @@
 # Diseño de base de datos
 
-> **Propósito:** Documentar el modelo lógico y decisiones de persistencia.
-
-> Reemplaza los textos entre `< >`. Elimina las secciones que no apliquen y registra cualquier decisión relevante.
-
 ## Control del documento
 
 | Campo | Valor |
 |---|---|
-| Estado | DRAFT |
-| Responsable | <nombre/rol> |
-| Última actualización | <YYYY-MM-DD> |
-| Versión relacionada | <versión/release> |
+| Estado | ANALYZED |
+| Responsable | Dev owner |
+| Última actualización | 2026-09-30 |
+| Versión relacionada | 2332e22 |
 
-## Motor
+## Motores
 
-<PostgreSQL/MySQL/etc. y justificación>
+| Conexión | Motor | Esquema | Proprietario | Modo | Uso |
+|---|---|---|---|---|---|
+| `sqlite` (default) | SQLite 3 (better-sqlite3) | `main` | Dev owner | **Lectura/Escritura** | `users`, `magic_links` |
+| `supabase` | PostgreSQL (proyecto Supabase, vía `pg`) | `dev` (con fallback `public`) | Otro equipo | **Solo lectura** | `dev."Insumos"` (~5,060 filas) |
+
+La sesión **no está en la base de datos**: `SESSION_DRIVER=cookie` (`.env`), por lo que el estado
+de sesión viaja en una cookie cifrada y no hay tabla `sessions`.
+
+El motor real de cada conexión está en `config/database.ts`. SQLite se elige porque auth es
+escritura ligera y en DEV no debe depender de red (ver [ADR-003](../03-architecture/adr/ADR-003-dos-conexiones-search-path.md)).
+El catálogo vive en PostgreSQL porque ya existe allí y no se replica (ver
+[ADR-004](../03-architecture/adr/ADR-004-catalogo-solo-lectura.md)).
 
 ## Convenciones
 
-<nombres, IDs, timestamps, auditoría>
+- **Auth (SQLite)**: tablas en minúsculas y snake_case (`magic_links`). Claves `id` enteras
+  autoincrementales (`integer ... primary key autoincrement`). Timestamps de Lucid
+  (`created_at`, `updated_at`) y columnas de negocio con sufijo `_at`.
+- **Tokens**: `magic_links.token_hash` es un SHA-256 en hex de 64 caracteres
+  (`createHash('sha256').update(token).digest('hex')`). El token en claro **solo** existe en el
+  correo y en la URL; en la tabla nunca se guarda en claro.
+- **Contraseñas**: `users.password` es `NOT NULL` y se hashea por el mixin
+  `withAuthFinder(hash)` de `@adonisjs/auth` (scrypt por defecto en AdonisJS 7). El hash se
+  recalcula en `User.create()` / `verifyCredentials()`, nunca explícitamente.
+- **Catálogo (Supabase)**: esquema preexistente, tabla y columnas con **comillas y mayúsculas**
+  (`"Insumos"`, `NAME`, `DEFAULT_CODE`, `MARCA`, `CANTIDAD`, `UNIT_COST`). No se renombra ni migra:
+  el modelo Lucid lo mapea a minúsculas (`nombre`, `codigo`, `categoria`, `cantidad`, `costo`) para
+  la UI.
+- **No hay migraciones para Supabase**: la conexión declara `migrations.paths: []`.
 
 ## Entidades principales
 
-- <entidad>: <responsabilidad>
+| Entidad | Conexión | Responsabilidad |
+|---|---|---|
+| `users` | sqlite | Persona con sesión. Solo email, nombre opcional y hash de contraseña. Creada por el seeder o por `POST /signup` |
+| `magic_links` | sqlite | Token de un solo uso hasheado, ligado a `user_id`, con expiración (30 min) y `used_at` |
+| `dev."Insumos"` | supabase | Catálogo de insumos del proveedor: nombre, código, marca, cantidad y costo |
+| `adonis_schema` / `adonis_schema_versions` | sqlite | Contabilidad interna de migraciones (Lucid). No es dominio |
 
 ## Relaciones y cardinalidad
 
-<resumen>
+- No hay **integridad referencial entre motores**: SQLite no sabe de Supabase y viceversa.
+- `magic_links.user_id → users.id` con **`ON DELETE CASCADE`**: borrar un usuario invalida sus
+  enlaces pendientes. Es la única FK de la aplicación.
+- `magic_links` **no** guarda el correo: se llega al usuario por la relación. Por eso un correo no
+  registrado no genera fila (el flujo corta antes de crear el enlace).
+- `dev."Insumos"` es una entidad **independiente** sin FKs a otras tablas de la aplicación. El resto
+  del catálogo —SKUs, familias, kits— **no está modelado todavía**.
 
-## Constraints
+## Constraints (verificadas contra `tmp/db.sqlite3`)
 
-- <constraint/regla>
+| Tabla | Constraint | Origen |
+|---|---|---|
+| `users.email` | `NOT NULL` + `UNIQUE` (índice `users_email_unique`) | migración `1761885935168` |
+| `users.full_name` | `NULLABLE` | migración |
+| `users.password` | `NOT NULL` | migración |
+| `magic_links.user_id` | `NULLABLE` + FK a `users.id` `ON DELETE CASCADE` | migración `1761885935169` |
+| `magic_links.token_hash` | `NOT NULL` + `UNIQUE` (índice `magic_links_token_hash_unique`) | migración |
+| `magic_links.expires_at` | `NOT NULL` | migración |
+| `magic_links.used_at` | `NULLABLE` (`NULL` = vigente) | migración |
+
+Las migraciones en `database/migrations` son la fuente ejecutable; el `DDL` real se confirmó
+inspeccionando `sqlite_master`. `magic_links.user_id` es nullable en el esquema aunque la
+aplicación siempre lo escribe (hereda el default de Lucid para belongsTo opcional).
 
 ## Índices
 
 | Tabla | Índice | Motivo |
 |---|---|---|
-| < > | < > | < > |
+| `users` | `users_email_unique (email)` | Integridad y `findBy('email')` en cada login |
+| `magic_links` | `magic_links_token_hash_unique (token_hash)` | Lookup por token en cada verificación; además garantiza unicidad del hash |
+| `magic_links` | **ninguno en `user_id` ni `expires_at`** | Baja corrección: el volumen de enlaces pendientes es de decenas. La limpieza de expirados tendría que recorrer la tabla |
+| `supabase` | índices del propietario, fuera de este repositorio | La búsqueda `ILIKE '%término%'` con wildcard inicial hace seq scan: ningún índice B-tree ayuda |
 
 ## Soft delete
 
-<dónde aplica y por qué>
+Ninguna tabla usa soft delete. La baja de un `user` es un `DELETE`; los tokens expirados se
+consideran inservibles por `expires_at` (no se purgan: ver Brechas).
 
 ## Migraciones
 
-Los scripts ejecutables viven en `/database/migrations`.
+- **SQLite (auth)**: `database/migrations/*.ts` — se ejecutan con `node ace migration:run`
+  (conexión default `sqlite`).
+- **Supabase (catálogo)**: `migrations.paths: []`. **Nunca** ejecutar
+  `node ace migration:run --connection=supabase`. El esquema de `dev."Insumos"` ya existe en
+  Supabase y su ciclo de vida es externo.
+
+## Session store
+
+La sesión se guarda en una **cookie cifrada y firmada** con `APP_KEY`
+(`SESSION_DRIVER=cookie`, `.env` → `config/session.ts:59`). No hay store en servidor:
+
+| Store declarado | ¿En uso? |
+|---|---|
+| `cookie` (`stores.cookie()`) | **Sí**: es el valor de `SESSION_DRIVER` |
+| `database` (`stores.database()`) | No. Requeriría una tabla `sessions` que **no existe**; activarlo fallaría |
+
+Consecuencias: la sesión **sobrevive a reinicios** del servidor (no hay estado en disco) y queda
+limitada por el tamaño de la cookie (~4 KB), por lo que los flash y props de sesión deben ser
+pequeños.
 
 ## Riesgos/volumen
 
-<crecimiento, particionado, retención, etc.>
+- **Autenticación (SQLite)**: volumen bajo (decenas de usuarios, un enlace por login). Crecimiento
+  en `magic_links` por cada solicitud de enlace.
+- **Catálogo (Supabase)**: ~5,060 filas estáticas. Cada visita a `/insumos` ejecuta 2 consultas
+  (conteo + página). El `ILIKE '%…%'` hace un seq scan; aceptable a este volumen, se vuelve
+  costoso a escala.
+- La sesión en cookie sobrevive a reinicios, pero depende de que `APP_KEY` no cambie: rotarlo
+  invalida todas las sesiones abiertas (ver [secrets-management](../06-security/secrets-management.md)).
+
+## Brechas
+
+- **No hay purga de `magic_links`**: los tokens usados y expirados se acumulan sin limpieza
+  (no hay worker ni job) y sin índice que lo haga barato.
+- **`magic_links.user_id` es nullable**: el esquema lo permite aunque la aplicación siempre lo
+  escriba. Nada impide un enlace huérfano por inserción directa.
+- **Los 7 esquemas restantes del catálogo no están modelados** (SKUs, familias, kits, usuarios de
+  negocio, zonas, módulos de salud): solo existe `dev."Insumos"`.
+- **No hay réplicas ni caché**: cada lectura va a la fuente primaria (ver [ADR-004](../03-architecture/adr/ADR-004-catalogo-solo-lectura.md)).
+- El store `database` de sesión está declarado en `config/session.ts` pero **no es funcional**
+  (falta la tabla `sessions`): un cambio de `SESSION_DRIVER` a `database` rompería el arranque.
+- Sin particionado ni retención; no es necesario al volumen actual.
+- El conteo de ~5,060 filas del catálogo proviene de `AGENTS.md` y **no se reverificó** en esta
+  tanda; la cifra exacta debe confirmarse con `SELECT count(*)` antes de usarla como línea base.
+
+## Referencias
+- [Diccionario de datos](data-dictionary.md)
+- [Diagrama ER](er-diagram.md)
+- [Estrategia de migraciones](migration-strategy.md)
+- [Respaldo y recuperación](backup-recovery.md)

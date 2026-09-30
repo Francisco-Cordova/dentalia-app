@@ -34,9 +34,10 @@ Administrador (usuario registrado en `users`).
 ## Flujos alternos
 
 ### A1 · El correo no está registrado
-1. Se omite la creación del token y el envío.
-2. La respuesta es **la misma** que en el flujo principal (mensaje genérico).
-3. El usuario no puede distinguir el caso.
+1. `magic_link_controller.ts:18` (`User.findBy`) no devuelve nada, por lo que **no se crea fila en
+   `magic_links` ni se envía correo**.
+2. La respuesta es **la misma** que en el flujo principal: 302 atrás con flash `success` genérico.
+3. El usuario no puede distinguir el caso (verificado por HTTP: 0 filas creadas, 0 usuarios).
 
 ### A2 · El enlace expiró
 1. `expires_at - ahora <= 0`.
@@ -53,8 +54,11 @@ Administrador (usuario registrado en `users`).
 
 ### A5 · El envío de correo falla
 - **En DEV**: se registra el error y se escribe `[MAGIC LINK DEV] {url}` en el log; la fila en
-  `magic_links` ya existe y la respuesta es el mensaje genérico.
+  `magic_links` ya existe y la respuesta es **302 atrás** con el mensaje genérico.
 - **En producción**: se relanza el error y el usuario recibe 500.
+
+> Ojo: la fila en `magic_links` se crea **antes** del envío (`magic_link_controller.ts:24-34`). Si
+> el envío falla y luego se reintenta con éxito, quedan dos filas; solo la del último correo vale.
 
 ### A6 · El usuario ya tiene sesión
 1. `middleware.guest()` detecta la sesión y redirige a `/skus`.
@@ -64,8 +68,19 @@ Administrador (usuario registrado en `users`).
 1. `middleware.auth()` falla y redirige a `/` con la URL pretendida guardada en sesión.
 
 ### A8 · Dos peticiones simultáneas con el mismo token
-1. Ambas pueden superar `used_at IS NULL` porque la comprobación y la escritura no son atómicas.
-2. Ambas podrían iniciar sesión.
+1. Ambas pueden superar `used_at IS NULL` porque la comprobación (`:53-57`) y la escritura (`:64-65`)
+   no están en una transacción.
+2. Ambas podrían iniciar sesión. Riesgo real, de ventana muy estrecha.
+
+### A9 · `POST /signup` — flujo paralelo de alta
+1. `GET /signup` sirve `inertia/pages/auth/signup.tsx`; **no está enlazado** desde la pantalla de
+   login, así que solo se alcanza escribiendo la URL.
+2. `POST /signup` valida nombre opcional, correo único y contraseña de 8–32 caracteres con
+   confirmación.
+3. `User.create()` hashea la contraseña por el mixin `withAuthFinder(hash)` e **inicia sesión de
+   inmediato**, sin verificar el correo: quien tiene el buzón puede tomar cualquier correo válido.
+4. Consecuencia: el alta no requiere invitación, y un mismo correo puede auto-registrarse sin
+   pasar por el magic link (que además exige usuario previo).
 
 ## Errores
 
@@ -73,7 +88,8 @@ Administrador (usuario registrado en `users`).
 |---|---|---|
 | Token inválido / expirado / ya usado | 302 a `/` + flash de error | `magic_link_controller.ts:59-62` |
 | SMTP caído en producción | 500 (el error se relanza) | `magic_link_controller.ts:40` |
-| SMTP caído en desarrollo | 200, mensaje genérico, URL en el log | `magic_link_controller.ts:36-38` |
+| SMTP caído en desarrollo | 302 atrás + mensaje genérico + URL en el log | `magic_link_controller.ts:36-38` |
+| `POST /signup` con correo duplicado | 422 con errores de validación (`unique`) | `signupValidator` (`app/validators/user.ts:18`) |
 | `POST /logout` sin token CSRF válido | 302 atrás + flash `Invalid or expired CSRF token`; **la sesión sobrevive** | `@adonisjs/shield` `E_BAD_CSRF_TOKEN` |
 | Sin sesión al pedir ruta protegida | 302 a `/` con URL pretendida | `auth_middleware.ts:22` |
 

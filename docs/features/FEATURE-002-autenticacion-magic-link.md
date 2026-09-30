@@ -108,24 +108,38 @@ Administrador (usuario registrado) y Visitante (sin sesión).
 
 ## Definition of Done
 - [x] Implementación completa.
-- [x] Pruebas aprobadas (smoke manual: magic link, expiración, uso único, logout, CSRF).
-- [x] Code Review aprobado.
+- [x] Pruebas aprobadas (smoke manual por HTTP: magic link, uso único, expiración, logout, CSRF).
+- [ ] Code Review aprobado — **no formalizado**: no hay proceso de review en el repositorio. La
+      revisión hecha fue documental y de código (esta tanda), no una aprobación trazable.
 - [ ] CI aprobado — **no disponible: el proyecto no tiene CI** (brecha).
 - [x] API/BD/docs actualizados.
 - [ ] QA/UAT completado — **no aplica: no hay ambiente de pruebas**.
 
 ## Evidencia
-- Commits: `9d07876` (login y primer dashboard de SKUs), `5b4f99b` (ajustes de sesión).
+- Commit de la funcionalidad: `9d07876` (login y primer dashboard de SKUs).
+  `5b4f99b` **no** corresponde a auth: es la reconexión de Supabase (`withConnectionRetry`), que
+  pertenece a FEATURE-001.
 - Archivos: `app/controllers/magic_link_controller.ts`, `app/controllers/session_controller.ts`,
   `app/controllers/new_account_controller.ts`, `app/middleware/{auth,guest,silent_auth,inertia}_middleware.ts`,
   `app/models/{user,magic_link}.ts`, `config/{session,shield,encryption,auth,mail}.ts`,
-  `inertia/pages/auth/login.tsx`.
-- Verificación de logout y CSRF por HTTP: ver [AC-AUT-006 y AC-AUT-007](../01-requirements/acceptance-criteria.md).
+  `inertia/pages/auth/login.tsx`, `database/migrations/1761885935169_create_magic_links_table.ts`.
+- Verificación por HTTP (esta tanda, servidor local + magic link insertado en `tmp/db.sqlite3`):
+  - Correo **no registrado** → 302 atrás, **0 filas** en `magic_links`, 0 usuarios creados.
+  - Token válido → 302 a `/skus`; `used_at` escrito; `expires_at` = ahora + 30 min.
+  - **Reutilización** del mismo token → 302 a `/` con flash de error.
+  - `GET /insumos` sin sesión → 302 a `/`; con sesión → 200.
+  - `POST /logout` **sin** `x-xsrf-token` → la sesión **sobrevive**; **con** token válido → sesión
+    destruida y `/skus` vuelve a 302.
 
 ## Brechas
 - Sin rate limiting, sin MFA, sin recuperación de contraseña, sin bloqueo por intentos.
 - `SessionController.store` (login por contraseña) es **código muerto**: no hay ruta que lo monte.
 - `users.password` es obligatorio aunque el sistema no usa contraseñas.
 - `magic_links` no se depura: los tokens usados y expirados se acumulan sin límite.
+- **El magic link no da de alta usuarios**: exige un `User` previo. Quien crea cuentas es el
+  seeder o el autoregistro de `/signup`, que no está enlazado desde el login y autentica de
+  inmediato sin verificar el correo.
+- La fila de `magic_links` se crea **antes** del envío SMTP: un fallo de envío deja un enlace
+  válido que el usuario nunca recibió.
 - No hay CSP ni `Referrer-Policy`.
 - No hay registro de auditoría de accesos (login/logout).

@@ -1,4 +1,4 @@
-﻿# Matriz de trazabilidad
+# Matriz de trazabilidad
 
 ## Control del documento
 

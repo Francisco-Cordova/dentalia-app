@@ -108,4 +108,26 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
   **requieren reiniciar** `npm run dev` (por ejemplo, para que `searchPath` o `keepAlive`
   apliquen hay que reiniciar, no basta con guardar).
 - Commits en español, rama `master`.
+
+## Commits
+
+- **Nunca hagas `git commit`, `git push`, `git tag` ni abras PR sin que el usuario lo pida
+  explícitamente.** Autorizar un commit una vez no autoriza los siguientes.
+- Cuando el trabajo esté listo para comitear: corre las verificaciones (`node ace codegen`,
+  `npm run lint`, `npm run typecheck`), y luego **presenta el estado y espera**. Nunca
+  comitees sin esa pausa.
+- Lo que se presenta para revisión:
+  - `git status --porcelain` — qué archivos cambiaron
+  - `git diff --stat` — el tamaño del cambio
+  - Un resumen de qué cambió y por qué
+  - El mensaje de commit propuesto, sin aplicarlo
+  - Si algo se quedó a medias o falla una verificación, dilo explícitamente
+- Si el usuario pide cambios, corrige y vuelve a presentar. No comitees hasta que vuelva a
+  aprobar.
+- La validación manual del usuario es obligatoria. Las verificaciones automáticas (lint,
+  typecheck, codegen) son necesarias pero no sustituyen esa revisión.
+- Los 3 commits ya existentes (`2332e22`, `7bb5ecb`, `2dcd5e6`) quedan como están: el usuario
+  revisó y decidió conservarlos. No hay remoto configurado, así que nada se ha enviado a
+  ningún sitio.
+
 - **Documentación**: `docs/` es la fuente de verdad documental. Al cambiar cualquier comportamiento (rutas, auth, BD, lógica, UI, integración), actualiza obligatoriamente: el documento del módulo correspondiente en `docs/`, `docs/01-requirements/traceability.md` y el estado de ese documento. No implementar features en estado `DRAFT` o `ANALYZED` (ver `docs/features/README.md`).

@@ -1,4 +1,5 @@
 import Insumo from '#models/insumo'
+import { withConnectionRetry } from '#services/with_connection_retry'
 import type { HttpContext } from '@adonisjs/core/http'
 
 function escapeLike(term: string) {
@@ -23,7 +24,7 @@ export default class InsumosController {
       query.where('DEFAULT_CODE', 'ilike', `%${escapeLike(codigo)}%`)
     }
 
-    const insumos = await query.paginate(page, perPage)
+    const insumos = await withConnectionRetry(() => query.paginate(page, perPage))
 
     return inertia.render('insumos', {
       insumos: insumos.all(),

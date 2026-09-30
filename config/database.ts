@@ -2,6 +2,18 @@ import app from '@adonisjs/core/services/app'
 import env from '#start/env'
 import { defineConfig } from '@adonisjs/lucid'
 
+/**
+ * Opciones del driver que el tipo de Lucid no declara (solo lista `ssl` y
+ * `connectionString`), aunque knex las reenvía tal cual a node-postgres.
+ * `keepAlive` detecta sockets muertos y evita errores tras periodos idle.
+ */
+const supabaseConnection = {
+  connectionString: env.get('SUPABASE_DB_URL'),
+  ssl: { rejectUnauthorized: false },
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 30_000,
+}
+
 const dbConfig = defineConfig({
   /**
    * Default connection used for all queries.
@@ -55,13 +67,24 @@ const dbConfig = defineConfig({
      *   Si una tabla futura vive en otro schema, quita el fallback `public` o
      *   usa `static schema` en ese modelo.
      * - Alternativa: el pooler transaccional de Supabase usa el puerto 6543.
+     * - Idle: Supabase cierra las conexiones inactivas. `keepAlive` con
+     *   `keepAliveInitialDelayMillis` detecta el socket muerto pronto, y el pool
+     *   con `idleTimeoutMillis` bajo recicla antes de que el servidor lo corte.
+     *   Aun así la primera consulta tras un corte puede fallar; por eso el
+     *   controller reintenta una vez (ver app/utils/with_connection_retry.ts).
      */
     supabase: {
       client: 'pg',
 
-      connection: {
-        connectionString: env.get('SUPABASE_DB_URL'),
-        ssl: { rejectUnauthorized: false },
+      connection: supabaseConnection,
+
+      pool: {
+        min: 0,
+        max: 5,
+        idleTimeoutMillis: 30_000,
+        acquireTimeoutMillis: 10_000,
+        createTimeoutMillis: 10_000,
+        propagateCreateError: true,
       },
 
       /**

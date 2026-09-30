@@ -70,8 +70,10 @@ const dbConfig = defineConfig({
      * - Idle: Supabase cierra las conexiones inactivas. `keepAlive` con
      *   `keepAliveInitialDelayMillis` detecta el socket muerto pronto, y el pool
      *   con `idleTimeoutMillis` bajo recicla antes de que el servidor lo corte.
-     *   Aun así la primera consulta tras un corte puede fallar; por eso el
-     *   controller reintenta una vez (ver app/services/with_connection_retry.ts).
+     *   El pool de `pg` ya descarta el cliente muerto y entrega otro, así que la
+     *   recuperación la hace el pool. `withConnectionRetry()` queda como red de seguridad
+     *   para el caso en que el error escape al pool (ver
+     *   app/services/with_connection_retry.ts).
      */
     supabase: {
       client: 'pg',

@@ -59,8 +59,9 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
   `supabaseConnection` de `config/database.ts`; knex las reenvía a node-postgres.
 - **Supabase corta conexiones inactivas.** Envolver toda consulta al catálogo en
   `withConnectionRetry()` de `app/services/with_connection_retry.ts` (import `#services/...`);
-  reintenta una vez. Es lo que evita el error "connection terminated unexpectedly" tras
-  minutos de inactividad.
+  reintenta una vez. Medido el 2026-09-30: el pool de `pg` ya descarta el cliente muerto y
+  entrega otro, así que el reintento casi nunca llega a ejecutarse. Es una red de seguridad
+  para cuando el error escapa al pool, no lo que evita el fallo.
 
 ## Tabla Insumos (nombre real con mayúscula)
 

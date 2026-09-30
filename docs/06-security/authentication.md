@@ -43,7 +43,7 @@ el mixin `withAuthFinder(hash)`. Pero **ninguna ruta montada verifica contraseñ
 ## Fortalezas
 
 - El token nunca se guarda en claro: una filtración de `magic_links` no permite autenticar.
-- No hay enumeration de usuarios: la respuesta es idéntica exista o no la cuenta.
+- No hay enumeración de usuarios: la respuesta es idéntica exista o no la cuenta.
 - La sesión sobrevive reinicios del servidor (los datos van cifrados en la cookie del cliente).
 - El identificador de sesión se regenera al iniciar sesión, lo que mitiga fijación de sesión.
 

@@ -71,7 +71,7 @@ coma final (`"A,B,"`) o una doble coma (`"A,,B"`), contar sin recortar daría un
 - [x] AC-KIT-004 · Los comodines `%` y `_` se buscan literalmente (devuelven 0, no 40).
 - [x] AC-KIT-005 · Los filtros se conservan al cambiar de página.
 - [x] AC-KIT-006 · Una búsqueda sin resultados renderiza vacío sin error.
-- [ ] AC-KIT-007 · La consulta sobrevive a un corte de conexión y reintenta una vez.
+- [x] AC-KIT-007 · La consulta sobrevive a un corte de conexión y reintenta una vez.
 - [x] AC-KIT-008 · El catálogo se lee desde el schema `dev`.
 - [x] AC-KIT-009 · No existe ninguna ruta que escriba en el catálogo de kits.
 - [x] AC-KIT-010 · La búsqueda se dispara con Enter (el form no tiene botón submit).
@@ -178,11 +178,24 @@ coma final (`"A,B,"`) o una doble coma (`"A,,B"`), contar sin recortar daría un
 - Verificaciones: `node ace codegen`, `npm run lint` y `npm run typecheck` sin errores.
 - Datos confirmados el 2026-09-30: `dev."Kits"` tiene 40 filas, `id` entre 7 y 136;
   `public."Kits"` tiene 40 filas y es la tabla de detalle, no un duplicado.
-- AC-KIT-007 **queda sin verificar**. El intento de provocarlo con
-  `pg_terminate_backend` falló: el rol de la aplicación no tiene permiso
-  (`42501 permission denied to terminate process`), porque en Supabase el rol `postgres` es
-  SUPERUSER. Verificarlo requiere cortar el socket desde el lado del servidor de la app, o
-  esperar a que el pool agote su `idleTimeoutMillis` de 30 s con el pooler de por medio.
+- AC-KIT-007 **verificado el 2026-09-30** con un corte real: el pool de Lucid abrió 1 conexión a
+  Supabase, se terminó ese backend desde el servidor con `pg_terminate_backend` y la siguiente
+  petición a `/kits` respondió 200 con los mismos 40 kits. El permiso nunca estuvo en falta: el
+  rol `postgres` del proyecto no es SUPERUSER, pero sí puede terminar sus propios backends; el
+  `42501` del intento anterior venía de alcanzar también los de `supabase_admin`.
+- **Lo que el control reveló**: el mismo pool de `config/database.ts` **sin**
+  `withConnectionRetry()` también devolvió las 5 060 filas de `dev."Insumos"`, y con el helper el
+  contador de intentos quedó en 1, es decir nunca reintentó. La página sobrevive, pero no por el
+  reintento.
+- **Por qué el helper se queda igual**: leyendo knex, el pool descarta el cliente muerto solo
+  cuando `pg` ya emitió el evento `error`/`end`, que marca `__knex__disposed`
+  (`knex/lib/dialects/postgres/index.js:84-89`); tarn lo rechaza después en su `validate`
+  (`knex/lib/client.js:370-373`). `validateConnection()` base devuelve `true` siempre
+  (`knex/lib/client.js:455-457`), así que no hay comprobación de salud del socket. Si la consulta
+  entra en la ventana entre "el servidor cerró el socket" y "pg se enteró", el pool entrega un
+  socket muerto. El helper cubre esa ventana; lo medido es que en esta prueba llegamos antes.
+- Nota sobre el enunciado del criterio: lo verificado es que **la consulta sobrevive** al corte.
+  El reintento existe en el código pero no se observó ejecutarse.
 
 ## Brechas
 - `Ordenar` y "Última actualización" son estáticos en la UI, aunque existe `created_at`.

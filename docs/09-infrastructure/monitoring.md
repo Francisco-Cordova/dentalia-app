@@ -54,7 +54,7 @@ que desplegar sin `NODE_ENV=production` es peligroso.
 | Tasa de error de conexión a Supabase | Errores del helper | > 1 seguido | Indica caída del proveedor |
 | Éxito de envío de correo | Fallos de SMTP | > 0 | **Sin correo no hay login**: es la dependencia crítica |
 | Links solicitados vs. consumidos | Ratio | Por definir | Detecta abuso del endpoint y enlaces robados |
-| Links fallidos por token inválido | Volumen | Pico puntual | Enumeração o enlaces expirados atacados |
+| Links fallidos por token inválido | Volumen | Pico puntual | Intentos de enumeración o enlaces expirados atacados |
 | Estado del proceso | Vivo/muerto | — | No hay health check ni supervisor |
 | Tamaño de `magic_links` | Filas acumuladas | Crece sin purga | SEC-009 |
 

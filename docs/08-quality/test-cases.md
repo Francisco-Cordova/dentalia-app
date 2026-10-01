@@ -64,7 +64,7 @@ en DEV y lo anotó aquí; no hay forma de volver a comprobarlo.
 | TC-SEC-002 | `NODE_ENV=production` | OPTIONS con cualquier origen | **No** se refleja; allowlist vacía | Ejecutado |
 | TC-SEC-003 | Cualquier ruta | Inspectar cabeceras | `X-Frame-Options: DENY`, `Strict-Transport-Security` (180 días), `X-Content-Type-Options: nosniff` | Ejecutado |
 | TC-SEC-004 | Cualquier ruta | Inspectar cabeceras | **No** hay `Content-Security-Policy` (deshabilitada en `config/shield.ts`) | Ejecutado |
-| TC-SEC-005 | Sesión válida | `POST /modulos-de-salud` | 404: `router.on()` solo registra GET | Ejecutado |
+| TC-SEC-005 | Sesión válida | `POST /modulos-de-salud` | 404: `router.get()` solo registra GET | Ejecutado |
 | TC-SEC-006 | Sin sesión | Cualquier ruta del panel | 302 a `/`, nunca se ejecuta el controller | Ejecutado |
 | TC-SEC-007 | `users` con email | `GET /auth/magic/:token` y luego mirar `magic_links` | `token_hash` es SHA-256; el token en claro no está en la BD | Ejecutado |
 

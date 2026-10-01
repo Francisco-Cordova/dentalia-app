@@ -58,7 +58,7 @@ módulos de salud) pero no corresponde a ningún permiso: es un regrouping visua
 | `FAM` | Familias | Maqueta | Ninguno |
 | `KIT` | Kits de insumos | FEATURE-005 `READY` | `dev."Kits"` (40 filas) |
 | `ZON` | Zonas | FEATURE-007 `READY` | `dev."zonas"` (2 filas) + `public.clinicas_zonas` |
-| `MSD` | Módulos de salud | Maqueta | Ninguno |
+| `MSD` | Módulos de salud | FEATURE-008 `READY` | `dev.modulos_salud` (10 filas) |
 | `USR` | Usuarios | Maqueta | Ninguno |
 | `ADM` | Shell del panel (sidebar, layout, toasts) | Funcional | — |
 

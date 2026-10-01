@@ -131,9 +131,36 @@ Un solo buscador (decidido por el usuario), que escapa `%` y `_`.
 Conteo verificado el 2026-09-30: zona 1 (`Turista`) → 7 clínicas, zona 2 (`Nacional`) → 6. Sin
 duplicados ni huérfanos. La app no escribe en esta tabla.
 
+## `dev.modulos_salud`
+
+10 filas, `id` 1 a 10 (contiguos). Tabla y columnas en **minúsculas**, como `dev."zonas"`. Se lee
+para el catálogo de módulos de salud; `public.modulos_salud` es un **duplicado exacto** (mismas 6
+columnas y mismas 10 filas, verificado con `EXCEPT` en ambos sentidos).
+
+| Columna | Tipo (PostgreSQL) | Nulo | Clave | Mapeo a la app | Descripción |
+|---|---|---|---|---|---|
+| `id` | `bigint` | no | PK | `id` | Clave del modelo |
+| `nombre` | `text` | no | — | `nombre` | Especialidad (PERIODONCIA, ORTODONCIA…) |
+| `descripcion` | `text` | sí | — | `descripcion` | Se muestra como subtexto bajo el nombre |
+| `created_at` | `timestamptz` | no | — | `createdAt` | **No se muestra** en la vista |
+| `updated_at` | `timestamptz` | no | — | — | **No se declara en el modelo**: esta pantalla no tiene columna "Última actualización" |
+| `id_modulo` | `bigint` | no | — | — | **No se declara en el modelo**: identificador de otro origen, desconocido. No coincide con `id` (fila `id` 1 → `id_modulo` 13; fila `id` 8 → 1) |
+
+### Mapeo de búsqueda
+- El buscador único de `/modulos-de-salud` filtra por `nombre` con `ilike` y `%`/`_` escapados
+  (`escapeLike()`).
+- Orden ascendente por `id`.
+
+### La columna "SKU" no sale de aquí
+La referencia de diseño muestra el número de SKUs de cada módulo bajo la cabecera "SKU". **Ese dato
+no es derivable**: `dev.modulos_salud` no tiene FKs que entren ni salgan (verificado en
+`information_schema`), y `public."SKU"` (255 filas) no tiene ninguna columna ni FK que referencie
+un módulo. La pantalla muestra `0` como dato dummy, declarado como constante `SKUS_DUMMY` en
+`inertia/pages/modulos_de_salud.tsx`.
+
 ## Esquemas del catálogo no modelados
 
-`SKUs`, `Familias`, `Usuarios`, `Módulos de salud` **no tienen modelo Lucid**: sus pantallas son
+`SKUs`, `Familias` y `Usuarios` **no tienen modelo Lucid**: sus pantallas son
 maquetas con `{}` como props. No se documenta aquí lo que no se conoce desde el código.
 
 ---

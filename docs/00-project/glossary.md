@@ -23,7 +23,7 @@ tiene un sentido de mercado distinto del de aquí, se indica.
 | **Familia** | Agrupación de productos. Hoy es una pantalla sin datos | `FAM` |
 | **Kit** | Conjunto de insumos que se venden juntos. Hoy es una pantalla sin datos | `KIT` |
 | **Zona** | Agrupación geográfica o de sucursal. Catálogo real en `dev."zonas"` (2 filas: Turista, Nacional); la definición exacta sigue siendo provisional | `ZON` |
-| **Módulo de salud** | Agrupación de productos por especialidad clínica. Hoy es una pantalla sin datos | `MSD` |
+| **Módulo de salud** | Agrupación de productos por especialidad clínica. Catálogo real en `dev.modulos_salud` (10 filas: PERIODONCIA, ORTODONCIA, ENDODONCIAS…); su definición exacta sigue siendo provisional | `MSD` |
 | **Dentalia** | Nombre de la marca cuyo catálogo público se replica como referencia de diseño | `ADM`, `Plantillas/` |
 | **Panel** | Área autenticada de la aplicación, con sidebar y 9 secciones | `ADM` |
 

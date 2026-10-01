@@ -415,3 +415,20 @@ Definidas en
 - BR-ZON-004: el buscador único filtra por `nombre` con `ILIKE` y `%`/`_` escapados.
 - BR-ZON-005: `costo` no se muestra en la pantalla ni se expone en el modelo; existe en la tabla
   pero es `NULL` en las 2 filas actuales. El `id` va bajo el nombre sin prefijo `#`.
+
+## BR-MSD · Módulos de salud
+
+Definidas en
+[FEATURE-008](../features/FEATURE-008-modulos-de-salud.md). Resumen:
+
+- BR-MSD-001: los módulos de salud se leen de `dev.modulos_salud` en Supabase, solo lectura. Tabla
+  y columnas en minúsculas (`id`, `nombre`, `descripcion`, `created_at`, `updated_at`,
+  `id_modulo`).
+- BR-MSD-002: la columna "SKU" **muestra 0 como dato dummy** en todas las filas. No es derivable:
+  `public."SKU"` no tiene ninguna columna ni FK que referencie un módulo, así que no hay forma de
+  contar los SKUs por módulo. El valor vive en una constante del frontend, declarada como tal.
+- BR-MSD-003: paginación de 10, orden ascendente por `id`.
+- BR-MSD-004: el buscador único filtra por `nombre` con `ILIKE` y `%`/`_` escapados.
+- BR-MSD-005: la tabla tiene 3 columnas (`Nombre`, `SKU`, `Opciones`) como la referencia de diseño;
+  el botón trash va bajo "Opciones". `id_modulo` y `updated_at` no se muestran ni se declaran en el
+  modelo.

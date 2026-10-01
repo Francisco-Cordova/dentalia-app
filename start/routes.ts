@@ -31,7 +31,7 @@ router
     router.get('/kits', [controllers.Kits, 'index']).as('kits')
     router.on('/usuarios').renderInertia('usuarios', {}).as('usuarios')
     router.get('/zonas', [controllers.Zonas, 'index']).as('zonas')
-    router.on('/modulos-de-salud').renderInertia('modulos_de_salud', {}).as('modulosDeSalud')
+    router.get('/modulos-de-salud', [controllers.ModulosSalud, 'index']).as('modulosDeSalud')
     router.on('/home').renderInertia('home', {}).as('home')
     router.post('logout', [controllers.Session, 'destroy']).as('session.destroy')
   })

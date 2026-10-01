@@ -31,11 +31,13 @@
 | [FEATURE-007](../features/FEATURE-007-catalogo-zonas.md) | RF-ZON-001 | BR-ZON-001, BR-ZON-005 | `GET /zonas` | `dev."zonas"`, `public.clinicas_zonas` | `zonas:read` | AC-ZON-001, AC-ZON-006, AC-ZON-008, AC-ZON-009, AC-ZON-010 | READY |
 | [FEATURE-007](../features/FEATURE-007-catalogo-zonas.md) | RF-ZON-002 | BR-ZON-003 | `GET /zonas?page=N` | `dev."zonas"` | `zonas:read` | AC-ZON-004 | READY |
 | [FEATURE-007](../features/FEATURE-007-catalogo-zonas.md) | RF-ZON-003 | BR-ZON-004 | `GET /zonas?nombre=...` | `dev."zonas"."nombre"` | `zonas:read` | AC-ZON-002, AC-ZON-003, AC-ZON-005, AC-ZON-007 | READY |
-| FEATURE-008 (Módulos de salud) | RF-MSD-001 | BR-MSD-001 | `GET /modulos-de-salud` (mock) | `Plantillas/modulos de salud/` | `modulos:read` | TC-PENDIENTE | DRAFT |
+| [FEATURE-008](../features/FEATURE-008-modulos-de-salud.md) | RF-MSD-001 | BR-MSD-001, BR-MSD-003 | `GET /modulos-de-salud` | `dev.modulos_salud` | `modulos:read` | AC-MSD-001, AC-MSD-006, AC-MSD-007, AC-MSD-008, AC-MSD-009 | READY |
+| [FEATURE-008](../features/FEATURE-008-modulos-de-salud.md) | RF-MSD-002 | BR-MSD-003 | `GET /modulos-de-salud?page=N` | `dev.modulos_salud` | `modulos:read` | AC-MSD-004 | READY |
+| [FEATURE-008](../features/FEATURE-008-modulos-de-salud.md) | RF-MSD-003 | BR-MSD-004 | `GET /modulos-de-salud?nombre=...` | `dev.modulos_salud.nombre` | `modulos:read` | AC-MSD-002, AC-MSD-003, AC-MSD-005 | READY |
 
 ## Notas
 
-- Las features `FEATURE-003`, `FEATURE-004`, `FEATURE-006` y `FEATURE-008` aparecen con
+- Las features `FEATURE-003`, `FEATURE-004` y `FEATURE-006` aparecen con
   identificadores **reservados**; sus documentos se redactarán al abrir cada una. Los requisitos
   `RF-*-001` y `BR-*-001` de esas filas son marcadores de posición, no requisitos redactados.
 - La columna `Test` referencia criterios de aceptación mientras no exista suite automatizada. La

@@ -30,17 +30,17 @@ y listar **qué hace falta saber** para poder especificarlas.
 | `KIT` | Kits de insumos | `/kits` | Real | RF-KIT-001…006 | FEATURE-005 `READY` |
 | `USR` | Usuarios | `/usuarios` | Maqueta | RF-USR-001 *reservado* | FEATURE-006 `DRAFT` |
 | `ZON` | Zonas | `/zonas` | Real | RF-ZON-001…003 | FEATURE-007 `READY` |
-| `MSD` | Módulos de salud | `/modulos-de-salud` | Maqueta | RF-MSD-001 *reservado* | FEATURE-008 `DRAFT` |
+| `MSD` | Módulos de salud | `/modulos-de-salud` | Real | RF-MSD-001…003 | FEATURE-008 `READY` |
 
 ## Por qué no hay requisitos
 
 | Motivo | Evidencia |
 |---|---|
-| Las páginas importan arrays literales desde el propio `.tsx` | `inertia/pages/skus.tsx`, `familias.tsx`, `modulos_de_salud.tsx`, `usuarios.tsx` |
-| No hay modelo Lucid para ninguno | `app/models/` tiene `user.ts`, `magic_link.ts`, `insumo.ts`, `kit.ts`, `zona.ts` |
+| Las páginas importan arrays literales desde el propio `.tsx` | `inertia/pages/skus.tsx`, `familias.tsx`, `usuarios.tsx` |
+| No hay modelo Lucid para ninguno | `app/models/` tiene `user.ts`, `magic_link.ts`, `insumo.ts`, `kit.ts`, `zona.ts`, `modulos_salud.ts` |
 | No hay migración que cree sus tablas | `database/migrations/` solo tiene `users` y `magic_links` |
-| No hay controller | `app/controllers/` tiene `insumos`, `kits`, `zonas`, `magic_link`, `new_account`, `session` |
-| Los buscadores y la paginación son controles sin comportamiento | Solo `/insumos`, `/kits` y `/zonas` conectan su `onKeyDown` y su paginación |
+| No hay controller | `app/controllers/` tiene `insumos`, `kits`, `zonas`, `modulos_salud`, `magic_link`, `new_account`, `session` |
+| Los buscadores y la paginación son controles sin comportamiento | Solo `/insumos`, `/kits`, `/zonas` y `/modulos-de-salud` conectan su `onKeyDown` y su paginación |
 | No hay reglas de negocio conocidas | No existe un documento de negocio en el repositorio |
 
 ## Qué hay que saber para especificar cada módulo
@@ -107,11 +107,19 @@ cada zona (hoy `public.clinicas_zonas` se lee, pero nadie escribe desde la app).
 
 ### `MSD` · FEATURE-008
 
-| # | Pregunta |
-|---|---|
-| 1 | ¿Qué es un "módulo de salud" en este negocio: especialidad, servicio o línea de producto? |
-| 2 | ¿Se relaciona con las familias o es un eje independiente? |
-| 3 | ¿El HTML de `Plantillas/modulos de salud/` resuelve alguna de estas preguntas? No: son páginas estáticas |
+La lectura del catálogo ya no está bloqueada: `dev.modulos_salud` existe en Supabase y
+[FEATURE-008](../features/FEATURE-008-modulos-de-salud.md) cubre el listado. Las preguntas quedan
+así:
+
+| # | Pregunta | Estado |
+|---|---|---|
+| 1 | ¿Qué es un "módulo de salud" en este negocio: especialidad, servicio o línea de producto? | **Abierta.** El dato sugiere especialidad: `PERIODONCIA`, `ORTODONCIA`, `ENDODONCIAS`, `CORONAS / PROSTODONCIA`, `DIAGNOSTICO Y PREVENCION`, `ESTETICO`. Es el mismo tipo de palabra que las zonas activas |
+| 2 | ¿Se relaciona con las familias o es un eje independiente? | **Abierta.** No hay ninguna tabla que relacione módulos con familias ni con insumos |
+| 3 | ¿Cuántos SKUs tiene cada módulo? | **Bloqueada por el dato.** Es la columna "SKU" de la pantalla, hoy con un **0 dummy**: `public."SKU"` (255 filas) no tiene columna ni FK hacia módulos, así que no hay forma de contarlos. Nadie ha decidido si la relación debe existir o si el conteo se calcula de otra forma |
+| 4 | ¿El HTML de `Plantillas/modulos de salud/` resuelve alguna de estas preguntas? | **No.** Solo resuelve el diseño: 3 columnas (`Nombre`, `SKU`, `Opciones`), con el número de SKUs bajo "SKU" y el botón trash bajo "Opciones" |
+
+Lo que sigue pendiente para `MSD` es la **escritura**: quién crea módulos de salud y qué relación
+habrá entre un módulo y sus SKUs.
 
 ### Transversal a los módulos sin datos
 
@@ -145,9 +153,9 @@ Mientras tanto, la regla de `features/README.md` sigue aplicando: **no implement
 
 ## Brechas
 
-- **Cuatro de ocho módulos de dominio sin requisito** (`SKU`, `FAM`, `USR`, `MSD`): la brecha
-  está declarada y con su causa identificada, no cerrada de hecho. `KIT` y `ZON` dejaron de estar
-  aquí: tienen tabla, requisitos y lectura real, aunque su escritura sigue sin decidir.
+- **Tres de ocho módulos de dominio sin requisito** (`SKU`, `FAM`, `USR`): la brecha
+  está declarada y con su causa identificada, no cerrada de hecho. `KIT`, `ZON` y `MSD` dejaron de
+  estar aquí: tienen tabla, requisitos y lectura real, aunque su escritura sigue sin decidir.
 - **La pregunta sobre quién da de alta usuarios está sin respuesta desde el primer día**: sin ella,
   el producto no es utilizable por nadie ajeno a quien mantiene la base de datos.
 - **No hay documento de negocio**: todas las preguntas de este documento llevan a la misma raíz, que

@@ -13,11 +13,12 @@ Crear un archivo por flujo relevante. Incluir actor, precondiciones, flujo princ
 | [FLOW-INS-001](FLOW-INS-001.md) | Consultar el catálogo de insumos | RF-INS-001 … RF-INS-005 | ANALYZED |
 | [FLOW-KIT-001](FLOW-KIT-001.md) | Consultar el catálogo de kits | RF-KIT-001 … RF-KIT-006 | ANALYZED |
 | [FLOW-ZON-001](FLOW-ZON-001.md) | Consultar el catálogo de zonas | RF-ZON-001 … RF-ZON-003 | ANALYZED |
+| [FLOW-MSD-001](FLOW-MSD-001.md) | Consultar el catálogo de módulos de salud | RF-MSD-001 … RF-MSD-003 | ANALYZED |
 
 ## Por qué no hay más flujos
 
-Solo hay cuatro porque solo hay cuatro módulos con comportamiento. Las otras cuatro pantallas
-(`SKU`, `FAM`, `USR`, `MSD`) importan arrays literales desde el propio `.tsx`: sin
+Solo hay cinco porque solo hay cinco módulos con comportamiento. Las otras tres pantallas
+(`SKU`, `FAM`, `USR`) importan arrays literales desde el propio `.tsx`: sin
 modelo, sin migración y sin controller **no hay flujo que documentar**, solo un render estático.
 
 Documentar un "alta de SKU" cuando no existe un modelo de SKU sería inventar funcionalidad. Las
@@ -35,7 +36,7 @@ Al abrir la feature correspondiente:
 | Alta de kit | RF-KIT-* | El precio ya se resolvió: es una columna almacenada, no se calcula. Falta decidir quién escribe y qué tabla relaciona cada kit con sus insumos |
 | Edición de usuarios | RF-USR-* | **Decidir quién da de alta a los usuarios**: es el bloqueo principal |
 | Alta de zona | RF-ZON-* | La lectura ya existe (FLOW-ZON-001). Falta decidir quién escribe zonas y quién asigna clínicas |
-| Alta de módulo de salud | RF-MSD-* | Definir el concepto en el negocio |
+| Alta de módulo de salud | RF-MSD-* | La lectura ya existe (FLOW-MSD-001). Falta definir el concepto en el negocio y decidir quién escribe |
 | Alta de cuenta (`POST /signup`) | RF-AUT-004 *no existe* | Ruta activa, no enlazada desde la UI, que autentica de inmediato sin verificar el correo |
 
 ## Plantilla
@@ -46,7 +47,7 @@ flujo en la tabla de arriba y en
 
 ## Brechas
 
-- **Cuatro módulos sin flujo**: `SKU`, `FAM`, `USR` y `MSD` no tienen flujo porque no tienen
+- **Tres módulos sin flujo**: `SKU`, `FAM` y `USR` no tienen flujo porque no tienen
   comportamiento, no porque falte documentación.
 - **`POST /signup` no tiene flujo documentado ni requisito**: es una ruta activa que crea cuentas e
   inicia sesión sin verificar el correo, y no está enlazada desde la interfaz. Nadie ha decidido si

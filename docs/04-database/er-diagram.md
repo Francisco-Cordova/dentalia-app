@@ -126,6 +126,23 @@ flowchart LR
 - Ojo: la FK de `zona_id` apunta a `public."zonas"`, no a `dev."zonas"`. Hoy son idénticas, pero
   son tablas distintas: si Odoo escribiera en una sola, el conteo y el listado podrían divergir.
 
+### `MODULOS_SALUD`: entidad aislada, sin relación con los SKUs
+
+```mermaid
+flowchart LR
+    M["MODULOS_SALUD 10 filas<br/>PERIODONCIA, ORTODONCIA, ..."]
+    S["public.SKU 255 filas"]
+    M -.->|"NO HAY FK:<br/>no se puede contar<br/>cuántos SKUs tiene cada módulo"| S
+```
+
+- `dev.modulos_salud` **no tiene ninguna FK** que entre ni salga (verificado en
+  `information_schema`). `public.modulos_salud` es un duplicado exacto, no una tabla de detalle.
+- La referencia de diseño muestra el conteo de SKUs por módulo, pero **`public."SKU"` tampoco tiene
+  columna ni FK hacia un módulo**: no hay forma de calcularlo. La pantalla muestra `0` como dato
+  dummy (`SKUS_DUMMY` en el frontend), no un conteo real.
+- Es la misma situación que `INSUMOS` y `KITS`: entidad aislada, sin FKs hacia otras tablas de la
+  aplicación.
+
 ## Entidades que NO existen en el modelo
 
 | Concepto de la UI | ¿Entidad? | Nota |
@@ -135,7 +152,6 @@ flowchart LR
 | Detalle de insumos por kit | **No** | Existe `public."Kits"` en Supabase (con cantidades), pero la app solo lee `dev."Kits"` |
 | Usuario de negocio (del catálogo) | **No** | `users` es solo auth; la pantalla `usuarios` está vacía |
 | Clínica | **No** | `public."clinicas"` existe y es el destino de la FK de `clinicas_zonas`, pero la app no la consulta |
-| Módulo de salud | **No** | Pantalla `modulos_de_salud` con props `{}` |
 | Sesión | **No** | `SESSION_DRIVER=cookie`: vive en una cookie cifrada, no en una tabla |
 
 ## Referencias

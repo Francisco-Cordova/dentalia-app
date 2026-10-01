@@ -30,11 +30,11 @@ Copiar `FEATURE-000-template.md`, asignar ID y completar el checklist `Ready for
 | [FEATURE-005](FEATURE-005-kits-de-insumos.md) | Kits de insumos | READY | RF-KIT-001 … RF-KIT-006 |
 | FEATURE-006 | Usuarios | DRAFT | RF-USR-001 (reservado) |
 | [FEATURE-007](FEATURE-007-catalogo-zonas.md) | Catálogo de zonas | READY | RF-ZON-001 … RF-ZON-003 |
-| FEATURE-008 | Módulos de salud | DRAFT | RF-MSD-001 (reservado) |
+| [FEATURE-008](FEATURE-008-modulos-de-salud.md) | Módulos de salud | READY | RF-MSD-001 … RF-MSD-003 |
 
 ## Identificadores reservados
 
-`FEATURE-003`, `FEATURE-004`, `FEATURE-006` y `FEATURE-008` están **reservados**: los documentos aún
+`FEATURE-003`, `FEATURE-004` y `FEATURE-006` están **reservados**: los documentos aún
 no existen. Se redactarán copiando `FEATURE-000-template.md` cuando se aborde cada módulo,
 tomando como referencia de diseño el HTML correspondiente en `Plantillas/`.
 
@@ -43,7 +43,7 @@ empezando por los buscadores y la paginación, que hoy son controles sin comport
 
 ## Brechas
 
-- `FEATURE-003`, `FEATURE-004`, `FEATURE-006` y `FEATURE-008` no tienen documento: no hay
+- `FEATURE-003`, `FEATURE-004` y `FEATURE-006` no tienen documento: no hay
   requisitos, criterios de aceptación ni flujo asociados hasta que se abran.
 - `Plantillas/` no tiene el HTML de referencia de SKUs ni de Insumos, que son las dos pantallas
   más importantes (destino tras el login y única con datos). Hay que capturar esas referencias.

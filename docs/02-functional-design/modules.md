@@ -6,11 +6,11 @@
 |---|---|
 | Estado | ANALYZED |
 | Responsable | Dev owner |
-| Última actualización | 2026-09-30 |
+| Última actualización | 2026-10-01 |
 | Versión relacionada | 2278659, 5b4f99b |
 
-El sistema tiene hoy tres módulos. Cada uno corresponde a un grupo de archivos real; las
-fronteras son observables en el código.
+El sistema tiene hoy cuatro módulos de dominio. Cada uno corresponde a un grupo de archivos real;
+las fronteras son observables en el código.
 
 ---
 
@@ -145,6 +145,36 @@ clínicas asignadas a cada zona.
 
 ---
 
+## Módulos de salud (`MSD`)
+
+**Objetivo:** listar los módulos de salud del catálogo con paginación y búsqueda por nombre.
+
+**Responsabilidades**
+- Leer `dev.modulos_salud` de Supabase en bloques de 10, ordenados por `id` ascendente.
+- Presentar la tabla con las 3 columnas de la referencia de diseño: `Nombre` (con la descripción
+  como subtexto), `SKU` y `Opciones` (botón trash) (`inertia/pages/modulos_de_salud.tsx`).
+- Mostrar **0 como dato dummy** en la columna "SKU" (`SKUS_DUMMY` en la página).
+
+**No es responsable de**
+- **Contar los SKUs de cada módulo**: no es derivable, `public."SKU"` no tiene columna ni FK hacia
+  módulos. Es lo que la referencia muestra bajo "SKU".
+- Escrituras: el modal "Nuevo módulo de salud" y el botón trash son maqueta, no hay ruta que
+  escriba ni que borre.
+- Mostrar `id_modulo` ni `updated_at`: no aparecen en la referencia y no se declaran en el modelo.
+
+**Dependencias**
+- Las mismas que el catálogo de insumos: conexión `supabase`, `withConnectionRetry()`.
+
+**Archivos**
+
+| Archivo | Rol |
+|---|---|
+| `app/models/modulos_salud.ts` | Modelo Lucid sobre `supabase.modulos_salud` (sin `id_modulo` ni `updated_at` a propósito) |
+| `app/controllers/modulos_salud_controller.ts` | Filtro `nombre`, paginación y render |
+| `inertia/pages/modulos_de_salud.tsx` | Tabla de 3 columnas, buscador, paginación, modal maqueta |
+
+---
+
 ## Shell del panel (`ADM`)
 
 **Objetivo:** marco visual y navegación común del área autenticada.
@@ -170,7 +200,7 @@ clínicas asignadas a cada zona.
 ## Brechas
 
 - **No existe módulo de autorización**: `roles-permissions`, policies y abilities están vacíos; el control de acceso es binario.
-- **No existe módulo de catálogo para el resto del dominio**: SKU, familias, módulos de salud y usuarios viven como páginas que importan arrays hardcodeados. Cada uno necesitará su módulo al pasar a datos reales.
-- Los catálogos de insumos, kits y zonas comparten forma y conexión, pero están duplicados como módulos independientes; no hay una abstracción común de catálogo.
+- **No existe módulo de catálogo para el resto del dominio**: SKU, familias y usuarios viven como páginas que importan arrays hardcodeados. Cada uno necesitará su módulo al pasar a datos reales.
+- Los catálogos de insumos, kits, zonas y módulos de salud comparten forma y conexión, pero están duplicados como módulos independientes; no hay una abstracción común de catálogo.
 - **No existe módulo de API**: `providers/api_provider.ts` y el registro de Tuyau están montados, pero ninguna ruta devuelve JSON.
 - Los límites entre módulos se apoyan en convención (rutas en `start/routes.ts`, alias `#models/*`, `#services/*`) y no en una capa de dominio o casos de uso.

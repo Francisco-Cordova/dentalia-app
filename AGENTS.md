@@ -121,12 +121,37 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
   Odoo cargue más zonas. El modal "Nueva zona" y el botón `···` son maqueta: **no hay ruta que
   escriba** en zonas.
 
+## Tabla módulos de salud (`dev.modulos_salud`)
+
+- 10 filas, `id` 1 a 10 (contiguos). Tabla y columnas en **minúsculas**: `id`, `nombre`,
+  `descripcion`, `created_at`, `updated_at`, `id_modulo`. El modelo `app/models/modulos_salud.ts`
+  mapea a la UI `id`, `nombre`, `descripcion`, `createdAt`.
+- **`id_modulo` (`bigint`, `NOT NULL`) NO se declara en el modelo a propósito**: no coincide con `id`
+  (fila `id` 1 → `id_modulo` 13; fila `id` 8 → `id_modulo` 1), así que es un identificador de otro
+  origen cuyo significado se desconoce, y no aparece en la pantalla ni en la plantilla de
+  referencia. `updated_at` tampoco se declara: esta pantalla no tiene "Última actualización".
+- `public.modulos_salud` **es un duplicado exacto** de `dev.modulos_salud` (mismas 6 columnas y
+  mismas 10 filas, verificado con `EXCEPT` en ambos sentidos). El `searchPath` pone `dev` primero.
+- **La tabla no tiene ninguna FK** que entre ni salga (verificado en `information_schema`), y
+  `public."SKU"` (255 filas) tampoco tiene columna ni FK hacia un módulo. Por eso **la columna
+  "SKU" de la pantalla NO es derivable**: se muestra `0` como dato dummy, declarado en el frontend
+  como constante `SKUS_DUMMY` en `inertia/pages/modulos_de_salud.tsx`. Si algún día se calcula de
+  verdad, esa constante desaparece y el valor pasa a venir del controller.
+- Buscador único: "nombre" → `nombre`. `ilike %term%` + `escapeLike()`. Orden por `id` asc,
+  `perPage` 10 (con 10 filas exactas queda 1 sola página: pie `1-10 de 10`).
+- **La tabla tiene 3 columnas** (`Nombre`, `SKU`, `Opciones`) como la plantilla de referencia: el
+  número de SKUs va bajo "SKU" y el botón trash (phosphor, confirmado en el HTML) bajo "Opciones".
+  La maqueta anterior tenía 4 columnas con el número en "Opciones" y una "Acciones" extra; se
+  descartó al seguir el HTML. El modal "Nuevo módulo de salud" y el botón trash son maqueta: **no
+  hay ruta que escriba ni borre**.
+
 ## Rutas y auth
 
 - Páginas mock: `router.on('/x').renderInertia('x', {})`. Con datos:
   `router.get('/insumos', [controllers.Insumos, 'index'])`,
-  `router.get('/kits', [controllers.Kits, 'index'])` o
-  `router.get('/zonas', [controllers.Zonas, 'index'])`.
+  `router.get('/kits', [controllers.Kits, 'index'])`,
+  `router.get('/zonas', [controllers.Zonas, 'index'])` o
+  `router.get('/modulos-de-salud', [controllers.ModulosSalud, 'index'])`.
 - Todo el admin está tras `middleware.auth()` (`start/routes.ts`); login es **magic link**
   (sin password). Para probar sin correo: en dev, si Mailtrap falla,
   `MagicLinkController` loguea `[MAGIC LINK DEV] <url>`; el token es de un solo uso y expira

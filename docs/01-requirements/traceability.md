@@ -28,12 +28,14 @@
 | [FEATURE-005](../features/FEATURE-005-kits-de-insumos.md) | RF-KIT-005 | BR-KIT-002 | `GET /kits` | `dev."Kits"."Insumos"` | `kits:read` | AC-KIT-012 | READY |
 | [FEATURE-005](../features/FEATURE-005-kits-de-insumos.md) | RF-KIT-006 | BR-KIT-003, BR-KIT-004 | `GET /kits` | `Costo`, `ID_odoo` | `kits:read` | AC-KIT-013, AC-KIT-014 | READY |
 | FEATURE-006 (Usuarios) | RF-USR-001 | BR-USR-001 | `GET /usuarios` (mock) | `Plantillas/usuarios/` | `usuarios:read` | TC-PENDIENTE | DRAFT |
-| FEATURE-007 (Zonas) | RF-ZON-001 | BR-ZON-001 | `GET /zonas` (mock) | `Plantillas/zonas/` | `zonas:read` | TC-PENDIENTE | DRAFT |
+| [FEATURE-007](../features/FEATURE-007-catalogo-zonas.md) | RF-ZON-001 | BR-ZON-001, BR-ZON-005 | `GET /zonas` | `dev."zonas"`, `public.clinicas_zonas` | `zonas:read` | AC-ZON-001, AC-ZON-006, AC-ZON-008, AC-ZON-009, AC-ZON-010 | READY |
+| [FEATURE-007](../features/FEATURE-007-catalogo-zonas.md) | RF-ZON-002 | BR-ZON-003 | `GET /zonas?page=N` | `dev."zonas"` | `zonas:read` | AC-ZON-004 | READY |
+| [FEATURE-007](../features/FEATURE-007-catalogo-zonas.md) | RF-ZON-003 | BR-ZON-004 | `GET /zonas?nombre=...` | `dev."zonas"."nombre"` | `zonas:read` | AC-ZON-002, AC-ZON-003, AC-ZON-005, AC-ZON-007 | READY |
 | FEATURE-008 (Módulos de salud) | RF-MSD-001 | BR-MSD-001 | `GET /modulos-de-salud` (mock) | `Plantillas/modulos de salud/` | `modulos:read` | TC-PENDIENTE | DRAFT |
 
 ## Notas
 
-- Las features `FEATURE-003`, `FEATURE-004`, `FEATURE-006` a `FEATURE-008` aparecen con
+- Las features `FEATURE-003`, `FEATURE-004`, `FEATURE-006` y `FEATURE-008` aparecen con
   identificadores **reservados**; sus documentos se redactarán al abrir cada una. Los requisitos
   `RF-*-001` y `BR-*-001` de esas filas son marcadores de posición, no requisitos redactados.
 - La columna `Test` referencia criterios de aceptación mientras no exista suite automatizada. La

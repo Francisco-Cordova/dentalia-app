@@ -98,11 +98,35 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
   `created_at` existe). El modal "Nuevo kit" y el botón `···` son maqueta: **no hay ruta que
   escriba** en kits.
 
+## Tabla zonas (`dev."zonas"`)
+
+- 2 filas, `id` 1 y 2 (contiguos). Tabla y columnas en **minúsculas**: `id`, `nombre`,
+  `descripcion`, `costo`, `created_at`, `updated_at`. El modelo `app/models/zona.ts` mapea a la UI
+  `id`, `nombre`, `descripcion`, `createdAt`.
+- **`costo` existe (`real`) pero NO se declara en el modelo a propósito**: es `NULL` en las 2
+  filas y la columna no aparece en la pantalla. No es un descuido; si algún día se muestra, se
+  agrega con su formato.
+- `public."zonas"` **sí es un duplicado exacto** de `dev."zonas"` (mismas columnas y 2 filas,
+  verificado con `EXCEPT` en ambos sentidos), a diferencia de `public."Kits"`, que es tabla de
+  detalle. El `searchPath` pone `dev` primero.
+- La columna "Clínicas" **no está** en `dev."zonas"`: sale de contar las filas de
+  `public.clinicas_zonas` con el mismo `zona_id` (13 filas, FKs reales a `public."clinicas"` y
+  `public."zonas"`). El controller lo hace con una **subconsulta correlacionada** en el `select`,
+  no con `join` + `groupBy`: `paginate()` arma su total con `clearSelect().count()`, y un join
+  contaría filas de la unión y no zonas. `Turista` → 7, `Nacional` → 6.
+- Buscador único: "nombre" → `nombre`. `ilike %term%` + `escapeLike()`. El `id` va bajo el nombre
+  **sin** prefijo `#` (a diferencia de kits, aquí no hay código de Odoo). No hay columna "Costo"
+  ni "Última actualización" en la referencia.
+- Paginación de 10 funcional aunque hoy haya 1 sola página (2 filas); queda preparada para cuando
+  Odoo cargue más zonas. El modal "Nueva zona" y el botón `···` son maqueta: **no hay ruta que
+  escriba** en zonas.
+
 ## Rutas y auth
 
 - Páginas mock: `router.on('/x').renderInertia('x', {})`. Con datos:
-  `router.get('/insumos', [controllers.Insumos, 'index'])` o
-  `router.get('/kits', [controllers.Kits, 'index'])`.
+  `router.get('/insumos', [controllers.Insumos, 'index'])`,
+  `router.get('/kits', [controllers.Kits, 'index'])` o
+  `router.get('/zonas', [controllers.Zonas, 'index'])`.
 - Todo el admin está tras `middleware.auth()` (`start/routes.ts`); login es **magic link**
   (sin password). Para probar sin correo: en dev, si Mailtrap falla,
   `MagicLinkController` loguea `[MAGIC LINK DEV] <url>`; el token es de un solo uso y expira

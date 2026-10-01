@@ -29,18 +29,18 @@ y listar **qué hace falta saber** para poder especificarlas.
 | `FAM` | Familias | `/familias` | Maqueta | RF-FAM-001 *reservado* | FEATURE-004 `DRAFT` |
 | `KIT` | Kits de insumos | `/kits` | Real | RF-KIT-001…006 | FEATURE-005 `READY` |
 | `USR` | Usuarios | `/usuarios` | Maqueta | RF-USR-001 *reservado* | FEATURE-006 `DRAFT` |
-| `ZON` | Zonas | `/zonas` | Maqueta | RF-ZON-001 *reservado* | FEATURE-007 `DRAFT` |
+| `ZON` | Zonas | `/zonas` | Real | RF-ZON-001…003 | FEATURE-007 `READY` |
 | `MSD` | Módulos de salud | `/modulos-de-salud` | Maqueta | RF-MSD-001 *reservado* | FEATURE-008 `DRAFT` |
 
 ## Por qué no hay requisitos
 
 | Motivo | Evidencia |
 |---|---|
-| Las páginas importan arrays literales desde el propio `.tsx` | `inertia/pages/skus.tsx`, `familias.tsx`, `zonas.tsx`, `modulos_de_salud.tsx`, `usuarios.tsx` |
-| No hay modelo Lucid para ninguno | `app/models/` tiene `user.ts`, `magic_link.ts`, `insumo.ts`, `kit.ts` |
+| Las páginas importan arrays literales desde el propio `.tsx` | `inertia/pages/skus.tsx`, `familias.tsx`, `modulos_de_salud.tsx`, `usuarios.tsx` |
+| No hay modelo Lucid para ninguno | `app/models/` tiene `user.ts`, `magic_link.ts`, `insumo.ts`, `kit.ts`, `zona.ts` |
 | No hay migración que cree sus tablas | `database/migrations/` solo tiene `users` y `magic_links` |
-| No hay controller | `app/controllers/` tiene `insumos`, `kits`, `magic_link`, `new_account`, `session` |
-| Los buscadores y la paginación son controles sin comportamiento | Solo `/insumos` y `/kits` conectan su `onKeyDown` y su paginación |
+| No hay controller | `app/controllers/` tiene `insumos`, `kits`, `zonas`, `magic_link`, `new_account`, `session` |
+| Los buscadores y la paginación son controles sin comportamiento | Solo `/insumos`, `/kits` y `/zonas` conectan su `onKeyDown` y su paginación |
 | No hay reglas de negocio conocidas | No existe un documento de negocio en el repositorio |
 
 ## Qué hay que saber para especificar cada módulo
@@ -92,11 +92,18 @@ tabla relaciona cada kit con sus insumos y en qué cantidad.
 
 ### `ZON` · FEATURE-007
 
-| # | Pregunta |
-|---|---|
-| 1 | ¿Una zona es geográfica (sucursal, ciudad) o de catálogo (tipo de zona clínica)? |
-| 2 | ¿Un insumo se asigna a zonas de forma fija o por reglas? |
-| 3 | ¿Las zonas filtran el catálogo de insumos? Si es así, `/insumos` necesita un parámetro nuevo |
+La lectura del catálogo ya no está bloqueada: `dev."zonas"` y `public.clinicas_zonas` existen en
+Supabase y [FEATURE-007](../features/FEATURE-007-catalogo-zonas.md) cubre el listado. Las
+preguntas quedan así:
+
+| # | Pregunta | Estado |
+|---|---|---|
+| 1 | ¿Una zona es geográfica (sucursal, ciudad) o de catálogo (tipo de zona clínica)? | **Abierta.** El dato sugiere de catálogo: solo hay `Turista` y `Nacional`, cada una con clínicas asignadas en `public.clinicas_zonas` |
+| 2 | ¿Un insumo se asigna a zonas de forma fija o por reglas? | **Abierta.** Hoy no hay tabla que relacione insumos con zonas |
+| 3 | ¿Las zonas filtran el catálogo de insumos? Si es así, `/insumos` necesita un parámetro nuevo | **Abierta.** Decisión de negocio |
+
+Lo que sigue pendiente para `ZON` es la **escritura**: quién crea zonas y quién asigna clínicas a
+cada zona (hoy `public.clinicas_zonas` se lee, pero nadie escribe desde la app).
 
 ### `MSD` · FEATURE-008
 
@@ -138,9 +145,9 @@ Mientras tanto, la regla de `features/README.md` sigue aplicando: **no implement
 
 ## Brechas
 
-- **Cinco de ocho módulos de dominio sin requisito** (`SKU`, `FAM`, `USR`, `ZON`, `MSD`): la brecha
-  está declarada y con su causa identificada, no cerrada de hecho. `KIT` dejó de estar aquí: tiene
-  tabla, requisitos y lectura real, aunque su escritura sigue sin decidir.
+- **Cuatro de ocho módulos de dominio sin requisito** (`SKU`, `FAM`, `USR`, `MSD`): la brecha
+  está declarada y con su causa identificada, no cerrada de hecho. `KIT` y `ZON` dejaron de estar
+  aquí: tienen tabla, requisitos y lectura real, aunque su escritura sigue sin decidir.
 - **La pregunta sobre quién da de alta usuarios está sin respuesta desde el primer día**: sin ella,
   el producto no es utilizable por nadie ajeno a quien mantiene la base de datos.
 - **No hay documento de negocio**: todas las preguntas de este documento llevan a la misma raíz, que

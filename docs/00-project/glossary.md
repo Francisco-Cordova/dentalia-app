@@ -22,7 +22,7 @@ tiene un sentido de mercado distinto del de aquí, se indica.
 | **SKU** | Unidad de inventario con variantes. Hoy es una pantalla sin datos | `SKU` |
 | **Familia** | Agrupación de productos. Hoy es una pantalla sin datos | `FAM` |
 | **Kit** | Conjunto de insumos que se venden juntos. Hoy es una pantalla sin datos | `KIT` |
-| **Zona** | Agrupación geográfica o de sucursal. Hoy es una pantalla sin datos | `ZON` |
+| **Zona** | Agrupación geográfica o de sucursal. Catálogo real en `dev."zonas"` (2 filas: Turista, Nacional); la definición exacta sigue siendo provisional | `ZON` |
 | **Módulo de salud** | Agrupación de productos por especialidad clínica. Hoy es una pantalla sin datos | `MSD` |
 | **Dentalia** | Nombre de la marca cuyo catálogo público se replica como referencia de diseño | `ADM`, `Plantillas/` |
 | **Panel** | Área autenticada de la aplicación, con sidebar y 9 secciones | `ADM` |

@@ -85,11 +85,56 @@ pero **no se selecciona**.
 Ambos escapan `%` y `_` con `escapeLike()` (`app/controllers/insumos_controller.ts:5-7`) para que
 el usuario pueda buscar literalmente esos caracteres.
 
+## `dev."Kits"`
+
+Ver [FEATURE-005](../features/FEATURE-005-kits-de-insumos.md): 40 filas, columnas en mayúsculas con
+tilde (`"Nombre"`, `"ID_odoo"`, `"Costo"`, `"Descripcion"`, `"Insumos"`), `id` disperso entre 7 y
+136. El modelo `app/models/kit.ts` mapea a `nombre`, `codigo`, `costo`, `descripcion`,
+`insumosRaw`. La columna `"Insumos"` es una lista de `DEFAULT_CODE` separados por coma, no un
+número: la tabla muestra el conteo, que calcula el controller.
+
+## `dev."zonas"`
+
+2 filas, columnas en **minúsculas**. El modelo `app/models/zona.ts` mapea a `id`, `nombre`,
+`descripcion`, `createdAt`.
+
+| Columna real | Tipo (PostgreSQL) | Expuesta como | Tipo TS | Uso |
+|---|---|---|---|---|
+| `id` | `bigint` | `id` | `number` | PK, orden asc, clave de React; se muestra bajo el nombre **sin** prefijo `#` |
+| `nombre` | `text` | `nombre` | `string` | Columna "Nombre"; filtrable con `ILIKE` |
+| `descripcion` | `text` | `descripcion` | `string \| null` | Leída por el modelo, no mostrada |
+| `costo` | `real` | — | — | **Existe pero no se expone**: `NULL` en las 2 filas y no aparece en la referencia de diseño |
+| `created_at` | `timestamptz` | `createdAt` | `Date` | No usada por la UI |
+
+`public."zonas"` es un **duplicado exacto** (mismas columnas, mismas 2 filas, verificado con
+`EXCEPT` en ambos sentidos). El `searchPath` pone `dev` primero, así que se lee `dev."zonas"`.
+
+### Mapeo de búsqueda
+
+| Campo de UI | Consulta | Query param |
+|---|---|---|
+| Buscar **Nombre** | `WHERE nombre ILIKE '%término%'` | `nombre` |
+
+Un solo buscador (decidido por el usuario), que escapa `%` y `_`.
+
+## `public.clinicas_zonas`
+
+13 filas. Tabla de relación zona↔clínica; la app **solo la cuenta** para la columna "Clínicas" de
+`/zonas`, con una subconsulta correlacionada (no un join, que rompería el conteo del paginador).
+
+| Columna | Tipo (PostgreSQL) | Nulo | Clave | Descripción |
+|---|---|---|---|---|
+| `clinica_id` | `bigint` | no | FK → `public."clinicas".id` | Clínica asignada |
+| `zona_id` | `bigint` | no | FK → `public."zonas".id` | Zona de la clínica |
+| `created_at` | `timestamptz` | sí | — | Alta de la relación |
+
+Conteo verificado el 2026-09-30: zona 1 (`Turista`) → 7 clínicas, zona 2 (`Nacional`) → 6. Sin
+duplicados ni huérfanos. La app no escribe en esta tabla.
+
 ## Esquemas del catálogo no modelados
 
-`SKUs`, `Familias`, `Kit de insumos`, `Usuarios`, `Zonas`, `Módulos de salud` **no tienen modelo
-Lucid**: sus pantallas son maquetas con `{}` como props. No se documenta aquí lo que no se conoce
-desde el código.
+`SKUs`, `Familias`, `Usuarios`, `Módulos de salud` **no tienen modelo Lucid**: sus pantallas son
+maquetas con `{}` como props. No se documenta aquí lo que no se conoce desde el código.
 
 ---
 

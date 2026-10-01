@@ -384,7 +384,8 @@ Si el primer y el segundo intento fallan, el error sube al handler y se renderiz
 - `BR-AUT-005` tiene una ventana de carrera (TOCTOU) entre comprobar y marcar el token como usado.
 - `BR-AUT-004` se cumple en el mensaje, pero se incumple implícitamente en el tiempo de respuesta.
 - No existe regla para el número máximo de enlaces vivos por usuario ni para su depuración.
-- No hay reglas de negocio definidas para las pantallas mock (SKU, familias, usuarios, zonas, módulos de salud): se redactarán junto con sus features.
+- No hay reglas de negocio definidas para las pantallas mock (SKU, familias, usuarios, módulos
+  de salud): se redactarán junto con sus features.
 
 ## BR-KIT · Kits de insumos
 
@@ -399,3 +400,18 @@ Definidas en
 - BR-KIT-005: paginación de 10, orden ascendente por `id`.
 - BR-KIT-006: los buscadores usan `ILIKE` con `%` y `_` escapados.
 - BR-KIT-007: los filtros se conservan al cambiar de página.
+
+## BR-ZON · Zonas
+
+Definidas en
+[FEATURE-007](../features/FEATURE-007-catalogo-zonas.md). Resumen:
+
+- BR-ZON-001: las zonas se leen de `dev."zonas"` en Supabase, solo lectura. Tabla y columnas en
+  minúsculas (`id`, `nombre`, `descripcion`, `costo`, `created_at`, `updated_at`).
+- BR-ZON-002: la columna "Clínicas" no está en `dev."zonas"`: se calcula contando las filas de
+  `public.clinicas_zonas` con el mismo `zona_id`, con una subconsulta correlacionada (no un join,
+  que rompería el conteo del paginador).
+- BR-ZON-003: paginación de 10, orden ascendente por `id`.
+- BR-ZON-004: el buscador único filtra por `nombre` con `ILIKE` y `%`/`_` escapados.
+- BR-ZON-005: `costo` no se muestra en la pantalla ni se expone en el modelo; existe en la tabla
+  pero es `NULL` en las 2 filas actuales. El `id` va bajo el nombre sin prefijo `#`.

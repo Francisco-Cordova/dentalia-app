@@ -14,7 +14,7 @@
 | Conexión | Motor | Esquema | Proprietario | Modo | Uso |
 |---|---|---|---|---|---|
 | `sqlite` (default) | SQLite 3 (better-sqlite3) | `main` | Dev owner | **Lectura/Escritura** | `users`, `magic_links` |
-| `supabase` | PostgreSQL (proyecto Supabase, vía `pg`) | `dev` (con fallback `public`) | Otro equipo | **Solo lectura** | `dev."Insumos"` (~5,060 filas) |
+| `supabase` | PostgreSQL (proyecto Supabase, vía `pg`) | `dev` (con fallback `public`) | Otro equipo | **Solo lectura** | `dev."Insumos"` (~5,060 filas), `dev."Kits"` (40), `dev."zonas"` (2) |
 
 La sesión **no está en la base de datos**: `SESSION_DRIVER=cookie` (`.env`), por lo que el estado
 de sesión viaja en una cookie cifrada y no hay tabla `sessions`.
@@ -49,6 +49,8 @@ El catálogo vive en PostgreSQL porque ya existe allí y no se replica (ver
 | `magic_links` | sqlite | Token de un solo uso hasheado, ligado a `user_id`, con expiración (30 min) y `used_at` |
 | `dev."Insumos"` | supabase | Catálogo de insumos del proveedor: nombre, código, marca, cantidad y costo |
 | `dev."Kits"` | supabase | Catálogo de kits: nombre, código de Odoo, costo, descripción y la lista de insumos que lo componen |
+| `dev."zonas"` | supabase | Catálogo de zonas: nombre y descripción. `costo` existe pero la app no lo expone |
+| `public.clinicas_zonas` | supabase | Relación zona↔clínica (`clinica_id`, `zona_id`): la app la cuenta para la columna "Clínicas" |
 | `adonis_schema` / `adonis_schema_versions` | sqlite | Contabilidad interna de migraciones (Lucid). No es dominio |
 
 ## Relaciones y cardinalidad
@@ -66,6 +68,11 @@ El catálogo vive en PostgreSQL porque ya existe allí y no se replica (ver
 - `public."Kits"` es una tabla distinta de `dev."Kits"`: una fila por par kit×insumo, con
   `id_kit`, `id_insumo`, `Cantidad requerida numero`, `Costo unitario` y `Usos`. Contiene la
   información de detalle que `dev."Kits"` no tiene. La aplicación no la consulta todavía.
+- `dev."zonas"` (2 filas, `id` 1 y 2) se lee para el catálogo de zonas. `public."zonas"` es un
+  **duplicado exacto** (mismas columnas y filas), no una tabla de detalle como `public."Kits"`.
+- `public.clinicas_zonas` (13 filas) es la única tabla del catálogo con **FKs reales** verificadas:
+  `clinica_id → public."clinicas".id` y `zona_id → public."zonas".id`. La app la cuenta por
+  `zona_id` para armar la columna "Clínicas" de `/zonas`; no escribe en ella.
 
 ## Constraints (verificadas contra `tmp/db.sqlite3`)
 
@@ -136,13 +143,14 @@ pequeños.
 - **`magic_links.user_id` es nullable**: el esquema lo permite aunque la aplicación siempre lo
   escriba. Nada impide un enlace huérfano por inserción directa.
 - **Los esquemas restantes del catálogo no están modelados** (SKUs, familias, usuarios de
-  negocio, zonas, módulos de salud): solo existen `dev."Insumos"` y `dev."Kits"`.
+  negocio, módulos de salud): solo existen `dev."Insumos"`, `dev."Kits"` y `dev."zonas"`
+  (con `public.clinicas_zonas` para el conteo de clínicas).
 - **No hay réplicas ni caché**: cada lectura va a la fuente primaria (ver [ADR-004](../03-architecture/adr/ADR-004-catalogo-solo-lectura.md)).
 - El store `database` de sesión está declarado en `config/session.ts` pero **no es funcional**
   (falta la tabla `sessions`): un cambio de `SESSION_DRIVER` a `database` rompería el arranque.
 - Sin particionado ni retención; no es necesario al volumen actual.
-- El conteo de 5,060 filas de `dev."Insumos"` y de 40 de `dev."Kits"` quedó **verificado** el
-  2026-09-30 con `SELECT count(*)`.
+- El conteo de 5,060 filas de `dev."Insumos"`, 40 de `dev."Kits"`, 2 de `dev."zonas"` y 13 de
+  `public.clinicas_zonas` quedó **verificado** el 2026-09-30 con `SELECT count(*)`.
 
 ## Referencias
 - [Diccionario de datos](data-dictionary.md)

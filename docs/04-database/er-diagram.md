@@ -69,6 +69,20 @@ erDiagram
         text Descripcion "leida, no mostrada"
         text Insumos "lista de DEFAULT_CODE, no es un numero"
     }
+
+    ZONAS {
+        bigint id PK "1..2"
+        text nombre "buscable"
+        text descripcion "leida, no mostrada"
+        real costo "existe pero la app no lo expone: NULL en las 2 filas"
+        timestamptz created_at "no usada por la UI"
+    }
+
+    CLINICAS_ZONAS {
+        bigint clinica_id FK "a public.clinicas.id"
+        bigint zona_id FK "a public.zonas.id"
+        timestamptz created_at
+    }
 ```
 
 ### Sin relación entre `INSUMOS` y `KITS`
@@ -90,8 +104,27 @@ cantidad de cada insumo. Esa información vive en `public."Kits"`, tabla desnorm
 `id_kit`, `id_insumo` y `Cantidad requerida numero`, que la aplicación todavía no consulta.
 
 `INSUMOS` y `KITS` son **entidades aisladas**: no tienen claves foráneas hacia otras tablas de la
-aplicación y no se relacionan con `USERS`. No hay forma de saber, desde este repositorio, con qué
-otras tablas del catálogo se enlazan (propiedad del equipo dueño de Supabase).
+aplicación y no se relacionan con `USERS`.
+
+### Relación real: `ZONAS` ↔ `CLINICAS_ZONAS`
+
+A diferencia de insumos y kits, el catálogo de zonas **sí tiene una relación con FKs reales**
+(verificadas en `information_schema`), aunque vive en el schema `public`:
+
+```mermaid
+flowchart LR
+    Z["ZONAS id=1 (Turista)"] -->|"1:N zona_id"| CZ["CLINICAS_ZONAS 7 filas"]
+    Z2["ZONAS id=2 (Nacional)"] -->|"1:N zona_id"| CZ2["CLINICAS_ZONAS 6 filas"]
+    CZ --> C1["public.clinicas ACOXPA, ALTABRISA, ..."]
+```
+
+- `public.clinicas_zonas.clinica_id → public."clinicas".id` y
+  `public.clinicas_zonas.zona_id → public."zonas".id`. 13 filas, sin duplicados ni huérfanos.
+- La app lee `dev."zonas"` (el `searchPath` pone `dev` primero; `public."zonas"` es un duplicado
+  exacto) y **cuenta** las filas de `public.clinicas_zonas` por `zona_id` con una subconsulta
+  correlacionada. No escribe en ninguna de las dos.
+- Ojo: la FK de `zona_id` apunta a `public."zonas"`, no a `dev."zonas"`. Hoy son idénticas, pero
+  son tablas distintas: si Odoo escribiera en una sola, el conteo y el listado podrían divergir.
 
 ## Entidades que NO existen en el modelo
 
@@ -101,7 +134,7 @@ otras tablas del catálogo se enlazan (propiedad del equipo dueño de Supabase).
 | Familia | **No** | Pantalla `familias` con props `{}` |
 | Detalle de insumos por kit | **No** | Existe `public."Kits"` en Supabase (con cantidades), pero la app solo lee `dev."Kits"` |
 | Usuario de negocio (del catálogo) | **No** | `users` es solo auth; la pantalla `usuarios` está vacía |
-| Zona | **No** | Pantalla `zonas` con props `{}` |
+| Clínica | **No** | `public."clinicas"` existe y es el destino de la FK de `clinicas_zonas`, pero la app no la consulta |
 | Módulo de salud | **No** | Pantalla `modulos_de_salud` con props `{}` |
 | Sesión | **No** | `SESSION_DRIVER=cookie`: vive en una cookie cifrada, no en una tabla |
 

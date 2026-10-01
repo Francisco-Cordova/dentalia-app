@@ -46,8 +46,8 @@ Esta carpeta es la **fuente de verdad documental**. Los documentos deben evoluci
 | Documento | Estado |
 |---|---|
 | [00-project/](00-project/) | ANALYZED — brief, alcance, glosario y stakeholders reconstruidos a partir del código; sin validación de negocio |
-| [01-requirements/](01-requirements/) | ANALYZED — RF/BR/AC de `AUT`, `INS` y `KIT` redactados; los otros 5 módulos registrados en [modulos-pendientes.md](01-requirements/modulos-pendientes.md) con sus preguntas bloqueantes |
-| [02-functional-design/](02-functional-design/) | ANALYZED — módulos, roles y 3 flujos; los 5 módulos restantes no tienen flujo porque no tienen comportamiento |
+| [01-requirements/](01-requirements/) | ANALYZED — RF/BR/AC de `AUT`, `INS`, `KIT` y `ZON` redactados; los otros 4 módulos registrados en [modulos-pendientes.md](01-requirements/modulos-pendientes.md) con sus preguntas bloqueantes |
+| [02-functional-design/](02-functional-design/) | ANALYZED — módulos, roles y 4 flujos; los 4 módulos restantes no tienen flujo porque no tienen comportamiento |
 | [03-architecture/](03-architecture/) | ANALYZED — contexto, contenedores, integraciones, vista de arquitectura y 6 ADR |
 | [04-database/](04-database/) | ANALYZED — diseño, diccionario, ER, migraciones y respaldo |
 | [05-api/](05-api/) | ANALYZED — frontera Inertia (no hay API REST); contratos, errores y guías |
@@ -56,7 +56,7 @@ Esta carpeta es la **fuente de verdad documental**. Los documentos deben evoluci
 | [08-quality/](08-quality/) | ANALYZED — estrategia, casos y niveles de prueba; sin automatización implementada |
 | [09-infrastructure/](09-infrastructure/) | ANALYZED — no existe infraestructura; infraestructura, ambientes, deployment, backup, DR y monitoreo documentados como inventario de lo ausente |
 | [10-operations/](10-operations/) | ANALYZED — sin proceso de incidentes; runbook y troubleshooting derivados del código, con rollback sin probar |
-| [features/](features/) | ANALYZED — FEATURE-001 y FEATURE-002 en `DONE` sin UAT; FEATURE-005 en `READY`; FEATURE-003, 004, 006…008 reservadas |
+| [features/](features/) | ANALYZED — FEATURE-001 y FEATURE-002 en `DONE` sin UAT; FEATURE-005 y FEATURE-007 en `READY`; FEATURE-003, 004, 006 y 008 reservadas |
 
 ## Estados de trabajo
 
@@ -76,17 +76,18 @@ implementado.
 
 ### Estado real del proyecto, en una frase
 
-El panel funciona con autenticación por enlace mágico verificada, y solo dos secciones tienen
-fuente de datos real —el catálogo de insumos y el de kits—; las otras cinco son maquetas; y no
-existe infraestructura, despliegue, pruebas ni proceso de incidentes.
+El panel funciona con autenticación por enlace mágico verificada, y solo tres secciones tienen
+fuente de datos real —el catálogo de insumos, el de kits y el de zonas—; las otras cuatro son
+maquetas; y no existe infraestructura, despliegue, pruebas ni proceso de incidentes.
 
 ### Lo que sigue pendiente, en orden
 
 | Prioridad | Pendencia | Dónde está documentada |
 |---|---|---|
 | 1 | Decidir quién da de alta a los usuarios | [stakeholders.md](00-project/stakeholders.md) · [modulos-pendientes.md](01-requirements/modulos-pendientes.md) |
-| 2 | Definir dónde viven los datos de SKU, familias, zonas y módulos de salud | [modulos-pendientes.md](01-requirements/modulos-pendientes.md) |
+| 2 | Definir dónde viven los datos de SKU, familias y módulos de salud | [modulos-pendientes.md](01-requirements/modulos-pendientes.md) |
 | 2b | Definir quién escribe kits y qué tabla relaciona cada kit con sus insumos | [FEATURE-005](features/FEATURE-005-kits-de-insumos.md) |
+| 2c | Definir quién escribe zonas y quién asigna clínicas a cada zona | [FEATURE-007](features/FEATURE-007-catalogo-zonas.md) |
 | 3 | Decidir si el autoregistro de `POST /signup` es funcionalidad o residuo | [scope.md](00-project/scope.md) |
 | 4 | Resolver el bloqueo de infraestructura: `tmp/db.sqlite3` impide desplegar | [environments.md](09-infrastructure/environments.md) |
 | 5 | Respaldar `tmp/db.sqlite3`, hoy irrecuperable | [backup-policy.md](09-infrastructure/backup-policy.md) |
@@ -100,7 +101,7 @@ existe infraestructura, despliegue, pruebas ni proceso de incidentes.
 |---|---|---|
 | `00-project` | 4 | 4 |
 | `01-requirements` | 6 | 6 |
-| `02-functional-design` | 5 | 5 |
+| `02-functional-design` | 6 | 6 |
 | `03-architecture` | 4 + 6 ADR + plantilla | 4 |
 | `04-database` | 6 | 4 |
 | `05-api` | 5 | 5 |
@@ -109,7 +110,7 @@ existe infraestructura, despliegue, pruebas ni proceso de incidentes.
 | `08-quality` | 7 | 7 |
 | `09-infrastructure` | 6 | 6 |
 | `10-operations` | 4 | 4 |
-| `features` | 4 | 4 |
+| `features` | 6 | 6 |
 
 Los documentos sin `## Brechas` son plantillas (`FLOW-000-template.md`, `ADR-000-template.md`,
 `FEATURE-000-template.md`), los índices de sección y los ADR, que en su lugar tienen la sección

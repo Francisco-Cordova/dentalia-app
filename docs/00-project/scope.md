@@ -31,16 +31,16 @@
 
 ### Alcance de las páginas de dominio
 
-Las 8 páginas de dominio del panel existen y replican el diseño, pero **7 no tienen detrás una fuente
+Las 8 páginas de dominio del panel existen y replican el diseño, pero **5 no tienen detrás una fuente
 de datos**:
 
 | Página | Datos |
 |---|---|
-| `/insumos` | **Reales** (Supabase, solo lectura) |
-| `/skus`, `/familias`, `/zonas`, `/modulos-de-salud`, `/usuarios` | Arrays hardcodeados en el propio `.tsx` |
+| `/insumos`, `/kits`, `/zonas` | **Reales** (Supabase, solo lectura) |
+| `/skus`, `/familias`, `/modulos-de-salud`, `/usuarios` | Arrays hardcodeados en el propio `.tsx` |
 
-Están en alcance como **interfaz**. No lo están como funcionalidad: mover un slider, paginar o
-buscar en ellas no cambia nada porque no hay consulta.
+Las que siguen con array hardcodeado están en alcance como **interfaz**. No lo están como
+funcionalidad: mover un slider, paginar o buscar en ellas no cambia nada porque no hay consulta.
 
 ### También en alcance
 

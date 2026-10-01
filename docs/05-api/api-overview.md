@@ -43,16 +43,16 @@ Lo que sí existe y es JSON:
 | GET | `/insumos` | `insumos` | `InsumosController.index` | `insumos`, `total`, `page`, `lastPage`, `nombre`, `codigo` |
 | GET | `/kits` | `kits` | `KitsController.index` | `kits[]`, `total`, `page`, `lastPage`, `nombre`, `codigo` |
 | GET | `/usuarios` | `usuarios` | `renderInertia` | `{}` (mock) |
-| GET | `/zonas` | `zonas` | `renderInertia` | `{}` (mock) |
+| GET | `/zonas` | `zonas` | `ZonasController.index` | `zonas[]`, `total`, `page`, `lastPage`, `nombre` |
 | GET | `/modulos-de-salud` | `modulosDeSalud` | `renderInertia` | `{}` (mock) |
 | GET | `/home` | `home` | `renderInertia` | `{}` (mock) |
 | POST | `/logout` | `session.destroy` | `SessionController.destroy` | 302 a `/` |
 
 Las páginas que siguen en mock registran **solo GET** vía `router.on(...)`: se verificó que POST,
-PUT, DELETE y PATCH devuelven 404. `/insumos` y `/kits` usan `router.get(...)` con un handler, y
-tampoco aceptan más métodos.
+PUT, DELETE y PATCH devuelven 404. `/insumos`, `/kits` y `/zonas` usan `router.get(...)` con un
+handler, y tampoco aceptan más métodos.
 
-Query params de `/insumos` y `/kits`: `page`, `nombre`, `codigo`.
+Query params de `/insumos` y `/kits`: `page`, `nombre`, `codigo`. De `/zonas`: `page`, `nombre`.
 
 ## Handlers sin ruta
 

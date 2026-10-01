@@ -1,55 +1,62 @@
-import { useState } from 'react'
+import { type FormEvent, type KeyboardEvent, useState } from 'react'
+import { Link, useRouter } from '@adonisjs/inertia/react'
 import Icon from '~/components/icon'
 
 type ZonaRow = {
   id: number
   nombre: string
-  subtitulo?: string
-  clinicas: string
+  clinicas: number
 }
 
-const zonas: ZonaRow[] = [
-  {
-    id: 1,
-    nombre: 'Nacional',
-    subtitulo: '2',
-    clinicas: '6',
-  },
-  {
-    id: 2,
-    nombre: 'Turista',
-    subtitulo: '1',
-    clinicas: '7',
-  },
-  {
-    id: 3,
-    nombre: 'Zona test',
-    clinicas: '2',
-  },
-  {
-    id: 4,
-    nombre: 'Zona Periferico Sur',
-    clinicas: '2',
-  },
-  {
-    id: 5,
-    nombre: 'Zona 23 Abril',
-    clinicas: '1',
-  },
-  {
-    id: 6,
-    nombre: 'Zona Capacitacion',
-    clinicas: '3',
-  },
-  {
-    id: 7,
-    nombre: 'Konfront 1',
-    clinicas: '1',
-  },
-]
+type ZonasProps = {
+  zonas: ZonaRow[]
+  total: number
+  page: number
+  lastPage: number
+  nombre?: string | null
+}
 
-export default function Zonas() {
+const PER_PAGE = 10
+
+export default function Zonas({ zonas, total, page, lastPage, nombre }: ZonasProps) {
+  const router = useRouter()
   const [showModal, setShowModal] = useState(false)
+
+  const first = (page - 1) * PER_PAGE + 1
+  const last = Math.min(page * PER_PAGE, total)
+
+  const windowStart = Math.max(1, page - 2)
+  const windowEnd = Math.min(lastPage, windowStart + 4)
+  const pages = Array.from({ length: windowEnd - windowStart + 1 }, (_, i) => windowStart + i)
+
+  const filters = (extra: Record<string, string | number>) => {
+    const qs: Record<string, string | number> = { ...extra }
+    if (nombre) qs.nombre = nombre
+    return qs
+  }
+
+  const search = (form: HTMLFormElement) => {
+    const data = new FormData(form)
+    const qs: Record<string, string> = {}
+    const term = String(data.get('nombre') ?? '').trim()
+    if (term) qs.nombre = term
+    router.get({ route: 'zonas', qs })
+  }
+
+  const handleSearch = (form: FormEvent<HTMLFormElement>) => {
+    form.preventDefault()
+    search(form.currentTarget)
+  }
+
+  /**
+   * El form no tiene botón submit, así que el "implicit submission" del navegador
+   * al presionar Enter no es fiable: lo manejamos a mano, igual que en insumos y kits.
+   */
+  const handleKeyDown = (form: KeyboardEvent<HTMLFormElement>) => {
+    if (form.key !== 'Enter') return
+    form.preventDefault()
+    search(form.currentTarget)
+  }
 
   return (
     <div className="skus-page">
@@ -60,12 +67,17 @@ export default function Zonas() {
         </button>
       </div>
 
-      <div className="skus-toolbar insumos-toolbar">
+      <form
+        className="skus-toolbar insumos-toolbar"
+        onSubmit={handleSearch}
+        onKeyDown={handleKeyDown}
+        autoComplete="off"
+      >
         <label className="skus-search">
           <Icon name="search" size={16} />
-          <input type="search" placeholder="Buscar..." />
+          <input type="search" name="nombre" placeholder="Buscar..." defaultValue={nombre ?? ''} />
         </label>
-      </div>
+      </form>
 
       <div className="skus-card">
         <table className="sku-table">
@@ -81,7 +93,11 @@ export default function Zonas() {
               <tr key={zona.id}>
                 <td>
                   <div className="sku-name">{zona.nombre}</div>
-                  {zona.subtitulo && <div className="sku-code">{zona.subtitulo}</div>}
+                  {/*
+                    El id va bajo el nombre y SIN prefijo `#`, a diferencia de kits.
+                    Aquí no hay código de Odoo: es el `id` numérico de la tabla.
+                  */}
+                  <div className="sku-code">{zona.id}</div>
                 </td>
                 <td className="sku-cell">{zona.clinicas}</td>
                 <td className="sku-cell sku-cell-view">
@@ -98,25 +114,49 @@ export default function Zonas() {
           </tbody>
         </table>
         <footer className="sku-footer">
-          <div className="sku-actions2">
-            <div className="sku-pagination">
-              <span>1-10 de 7</span>
-              <button type="button" className="page-btn" aria-label="Página anterior">
+          <div className="sku-pagination">
+            <span>
+              {first}-{last} de {total.toLocaleString('en-US')}
+            </span>
+            {page > 1 ? (
+              <Link
+                className="page-btn"
+                route="zonas"
+                qs={filters({ page: page - 1 })}
+                aria-label="Página anterior"
+              >
+                <Icon name="chevronLeft" size={16} />
+              </Link>
+            ) : (
+              <button type="button" className="page-btn" aria-label="Página anterior" disabled>
                 <Icon name="chevronLeft" size={16} />
               </button>
-              {[1, 2].map((page) => (
-                <button
-                  key={page}
-                  type="button"
-                  className={page === 1 ? 'page-btn active' : 'page-btn'}
-                >
-                  {page}
+            )}
+            {pages.map((p) =>
+              p === page ? (
+                <button key={p} type="button" className="page-btn active">
+                  {p}
                 </button>
-              ))}
-              <button type="button" className="page-btn" aria-label="Página siguiente">
+              ) : (
+                <Link key={p} className="page-btn" route="zonas" qs={filters({ page: p })}>
+                  {p}
+                </Link>
+              )
+            )}
+            {page < lastPage ? (
+              <Link
+                className="page-btn"
+                route="zonas"
+                qs={filters({ page: page + 1 })}
+                aria-label="Página siguiente"
+              >
+                <Icon name="chevronRight" size={16} />
+              </Link>
+            ) : (
+              <button type="button" className="page-btn" aria-label="Página siguiente" disabled>
                 <Icon name="chevronRight" size={16} />
               </button>
-            </div>
+            )}
           </div>
         </footer>
       </div>

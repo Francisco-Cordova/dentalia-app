@@ -62,7 +62,7 @@ fronteras son observables en el código.
 
 **No es responsable de**
 - Escrituras, altas o ediciones de insumos: el catálogo es externo y de solo lectura.
-- SKU, familias, zonas, módulos de salud y usuarios: son pantallas maqueta sin conexión a datos.
+- SKU, familias, módulos de salud y usuarios: son pantallas maqueta sin conexión a datos.
 - Caché del catálogo: cada visita a `/insumos` vuelve a Supabase.
 
 **Dependencias**
@@ -111,6 +111,40 @@ el conteo de insumos que los componen y su costo.
 
 ---
 
+## Catálogo de zonas (`ZON`)
+
+**Objetivo:** listar las zonas del catálogo con paginación, búsqueda por nombre y el conteo de
+clínicas asignadas a cada zona.
+
+**Responsabilidades**
+- Leer `dev."zonas"` de Supabase en bloques de 10, ordenados por `id` ascendente.
+- Calcular el conteo de clínicas por zona con una subconsulta correlacionada sobre
+  `public.clinicas_zonas` (`app/controllers/zonas_controller.ts`), no con un join que rompería
+  el conteo del paginador.
+- Presentar el `id` bajo el nombre sin prefijo `#` (a diferencia de kits, aquí no hay código de
+  Odoo).
+- Presentar la tabla, el buscador y la paginación (`inertia/pages/zonas.tsx`).
+
+**No es responsable de**
+- Escrituras: el modal "Nueva zona" y el botón de acciones son maqueta, no hay ruta que escriba.
+- La asignación de clínicas a zonas: `public.clinicas_zonas` se lee, pero nadie escribe desde
+  la app.
+- Mostrar `costo`: existe en la tabla pero no se expone (es `NULL` en las 2 filas actuales y
+  no aparece en la referencia de diseño).
+
+**Dependencias**
+- Las mismas que el catálogo de insumos: conexión `supabase`, `withConnectionRetry()`.
+
+**Archivos**
+
+| Archivo | Rol |
+|---|---|
+| `app/models/zona.ts` | Modelo Lucid sobre `supabase."zonas"` (sin `costo` a propósito) |
+| `app/controllers/zonas_controller.ts` | Filtro `nombre`, subconsulta de clínicas, paginación y render |
+| `inertia/pages/zonas.tsx` | Tabla, buscador, paginación, modal maqueta |
+
+---
+
 ## Shell del panel (`ADM`)
 
 **Objetivo:** marco visual y navegación común del área autenticada.
@@ -136,7 +170,7 @@ el conteo de insumos que los componen y su costo.
 ## Brechas
 
 - **No existe módulo de autorización**: `roles-permissions`, policies y abilities están vacíos; el control de acceso es binario.
-- **No existe módulo de catálogo para el resto del dominio**: SKU, familias, zonas, módulos de salud y usuarios viven como páginas que importan arrays hardcodeados. Cada uno necesitará su módulo al pasar a datos reales.
-- El catálogo de insumos y el de kits comparten forma y conexión, pero están duplicados como módulos independientes; no hay una abstracción común de catálogo.
+- **No existe módulo de catálogo para el resto del dominio**: SKU, familias, módulos de salud y usuarios viven como páginas que importan arrays hardcodeados. Cada uno necesitará su módulo al pasar a datos reales.
+- Los catálogos de insumos, kits y zonas comparten forma y conexión, pero están duplicados como módulos independientes; no hay una abstracción común de catálogo.
 - **No existe módulo de API**: `providers/api_provider.ts` y el registro de Tuyau están montados, pero ninguna ruta devuelve JSON.
 - Los límites entre módulos se apoyan en convención (rutas en `start/routes.ts`, alias `#models/*`, `#services/*`) y no en una capa de dominio o casos de uso.

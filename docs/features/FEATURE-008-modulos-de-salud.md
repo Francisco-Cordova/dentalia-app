@@ -86,8 +86,8 @@ En las 10 filas `descripcion` viene con el mismo texto que `nombre`, y `created_
 - [x] AC-MSD-005 · Una búsqueda sin resultados renderiza vacío sin error.
 - [x] AC-MSD-006 · El orden es ascendente por `id` (`SIN ASIGNAR` id 1 va antes que `ESTETICO`
       id 10).
-- [ ] AC-MSD-007 · La tabla tiene 3 columnas (`Nombre`, `SKU`, `Opciones`) como la referencia.
-- [ ] AC-MSD-008 · La columna "SKU" muestra `0` en todas las filas (dato dummy declarado, no real).
+- [x] AC-MSD-007 · La tabla tiene 3 columnas (`Nombre`, `SKU`, `Opciones`) como la referencia.
+- [x] AC-MSD-008 · La columna "SKU" muestra `0` en todas las filas (dato dummy declarado, no real).
 - [x] AC-MSD-009 · La consulta se ejecuta dentro de `withConnectionRetry()` (tolerancia a corte).
 
 ### Evidencia de verificación (2026-10-01)
@@ -98,12 +98,10 @@ real, búsqueda `periodoncia` → 1 y `QUIRURGICOS` → 2, `%` y `_` → 0 resul
 vacía conservando el número, filtro+página combinados, y las props limitadas a
 `id,nombre,descripcion` (sin `id_modulo`, `updated_at` ni `sku`).
 
-AC-MSD-007 y AC-MSD-008 quedan **sin marcar a propósito**: son de renderizado y no se pueden
-comprobar por HTTP, porque esta app **no tiene SSR** (el HTML servido es el shell más el
-`data-page`; el markup de la tabla lo monta React en el cliente). Se cierran en la validación
-manual del usuario en el navegador. El código ya los cumple: las 3 `<th>` de
-`inertia/pages/modulos_de_salud.tsx` son `Nombre`, `SKU`, `Opciones` y la celda SKU pinta
-`SKUS_DUMMY` (= `0`).
+AC-MSD-007 y AC-MSD-008 los verificó el usuario en el navegador (2026-10-01), que es la única
+vía: esta app **no tiene SSR**, así que el HTML servido es el shell más el `data-page` y el
+markup de la tabla lo monta React en el cliente. Confirmó las 3 columnas `Nombre`, `SKU`,
+`Opciones` y el `0` en las 10 celdas de la columna SKU. Con esto los 9 AC quedan cerrados.
 
 ## Casos límite
 - Hay exactamente 10 filas y el `perPage` es 10: una sola página, pie `1-10 de 10`. La paginación
@@ -167,12 +165,14 @@ manual del usuario en el navegador. El código ya los cumple: las 3 `<th>` de
   (decidido por el usuario: dejarla preparada para cuando Odoo cargue más módulos).
 
 ## Definition of Done
-- [ ] Implementación completa.
-- [ ] Pruebas aprobadas.
-- [ ] Code Review aprobado.
-- [ ] CI aprobado.
-- [ ] API/BD/docs actualizados.
-- [ ] QA/UAT completado según aplique.
+- [x] Implementación completa.
+- [x] Pruebas aprobadas (smoke HTTP autenticado sobre `GET /modulos-de-salud`: 18 checks en
+      verde, más revisión manual del usuario en el navegador para las columnas y el dato dummy).
+- [ ] Code Review aprobado - **no formalizado**: no hay proceso de review en el repositorio.
+- [ ] CI aprobado - **no disponible: el proyecto no tiene CI** (brecha).
+- [x] API/BD/docs actualizados (`01-requirements`, `02-functional-design`, `03-architecture`,
+      `04-database`, `05-api`, `08-quality`, `features/`, `docs/README.md` y `AGENTS.md`).
+- [ ] QA/UAT completado - **no aplica: no hay ambiente de pruebas**.
 
 ## Brechas
 - El modal "Nuevo módulo de salud" y el botón trash son maqueta, sin escritura.

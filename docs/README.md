@@ -46,8 +46,8 @@ Esta carpeta es la **fuente de verdad documental**. Los documentos deben evoluci
 | Documento | Estado |
 |---|---|
 | [00-project/](00-project/) | ANALYZED — brief, alcance, glosario y stakeholders reconstruidos a partir del código; sin validación de negocio |
-| [01-requirements/](01-requirements/) | ANALYZED — RF/BR/AC de `AUT`, `INS`, `KIT`, `ZON`, `MSD` y `USR` redactados; los otros 2 módulos registrados en [modulos-pendientes.md](01-requirements/modulos-pendientes.md) con sus preguntas bloqueantes |
-| [02-functional-design/](02-functional-design/) | ANALYZED — módulos, roles y 6 flujos; los 2 módulos restantes no tienen flujo porque no tienen comportamiento |
+| [01-requirements/](01-requirements/) | ANALYZED — RF/BR/AC de `AUT`, `INS`, `SKU`, `KIT`, `ZON`, `MSD` y `USR` redactados; el módulo restante (`FAM`) registrado en [modulos-pendientes.md](01-requirements/modulos-pendientes.md) con sus preguntas bloqueantes |
+| [02-functional-design/](02-functional-design/) | ANALYZED — módulos, roles y 7 flujos; el módulo restante (`FAM`) no tiene flujo porque no tiene comportamiento |
 | [03-architecture/](03-architecture/) | ANALYZED — contexto, contenedores, integraciones, vista de arquitectura y 6 ADR |
 | [04-database/](04-database/) | ANALYZED — diseño, diccionario, ER, migraciones y respaldo |
 | [05-api/](05-api/) | ANALYZED — frontera Inertia (no hay API REST); contratos, errores y guías |
@@ -56,7 +56,7 @@ Esta carpeta es la **fuente de verdad documental**. Los documentos deben evoluci
 | [08-quality/](08-quality/) | ANALYZED — estrategia, casos y niveles de prueba; sin automatización implementada |
 | [09-infrastructure/](09-infrastructure/) | ANALYZED — no existe infraestructura; infraestructura, ambientes, deployment, backup, DR y monitoreo documentados como inventario de lo ausente |
 | [10-operations/](10-operations/) | ANALYZED — sin proceso de incidentes; runbook y troubleshooting derivados del código, con rollback sin probar |
-| [features/](features/) | ANALYZED — FEATURE-001 y FEATURE-002 en `DONE` sin UAT; FEATURE-005, FEATURE-006, FEATURE-007 y FEATURE-008 en `READY`; FEATURE-003 y 004 reservadas |
+| [features/](features/) | ANALYZED — FEATURE-001, 002, 003, 005, 007 y 008 en `DONE`, ninguno con UAT formal; FEATURE-006 (usuarios) en `UAT` esperando revisión manual; FEATURE-004 reservada |
 
 ## Estados de trabajo
 
@@ -76,26 +76,28 @@ implementado.
 
 ### Estado real del proyecto, en una frase
 
-El panel funciona con autenticación por enlace mágico verificada, y solo cinco secciones tienen
-fuente de datos real —el catálogo de insumos, el de kits, el de zonas, el de módulos de salud y el de
-usuarios—; las otras dos son maquetas; y no existe infraestructura, despliegue, pruebas ni proceso de
-incidentes. El catálogo de usuarios es el único que no lee Supabase: viene de `users` en SQLite, la
-tabla de la autenticación.
+El panel funciona con autenticación por enlace mágico verificada, y solo seis secciones tienen
+fuente de datos real —el catálogo de insumos, el de SKUs, el de kits, el de zonas, el de módulos de
+salud y el de usuarios—; la de familias es la única maqueta que queda; y no existe infraestructura,
+despliegue, pruebas ni proceso de incidentes. El catálogo de usuarios es el único que no lee Supabase:
+viene de `users` en SQLite, la tabla de la autenticación. En `/skus`, 5 de las 7 columnas son dato
+dummy porque no son derivables de `dev."SKU"`.
 
 ### Lo que sigue pendiente, en orden
 
 | Prioridad | Pendencia | Dónde está documentada |
 |---|---|---|
 | 1 | Decidir quién da de alta a los usuarios (el catálogo ya lista, pero no crea) | [stakeholders.md](00-project/stakeholders.md) · [modulos-pendientes.md](01-requirements/modulos-pendientes.md) · [FEATURE-006](features/FEATURE-006-usuarios.md) |
-| 2 | Definir dónde viven los datos de SKU y familias | [modulos-pendientes.md](01-requirements/modulos-pendientes.md) |
+| 2 | Definir dónde viven los datos de familias (`FAM`, la última pantalla en maqueta) | [modulos-pendientes.md](01-requirements/modulos-pendientes.md) |
 | 2b | Definir quién escribe kits y qué tabla relaciona cada kit con sus insumos | [FEATURE-005](features/FEATURE-005-kits-de-insumos.md) |
 | 2c | Definir quién escribe zonas y quién asigna clínicas a cada zona | [FEATURE-007](features/FEATURE-007-catalogo-zonas.md) |
 | 2d | Definir el concepto de módulo de salud y qué relación habrá entre un módulo y sus SKUs | [FEATURE-008](features/FEATURE-008-modulos-de-salud.md) |
+| 2e | Definir qué es un SKU en el negocio y qué significan `Familia`, `Especialidad` y `Tipo` (hoy `—` y "Tratamiento" fijo) | [FEATURE-003](features/FEATURE-003-skus.md) |
 | 3 | Decidir si el autoregistro de `POST /signup` es funcionalidad o residuo | [scope.md](00-project/scope.md) |
 | 4 | Resolver el bloqueo de infraestructura: `tmp/db.sqlite3` impide desplegar | [environments.md](09-infrastructure/environments.md) |
 | 5 | Respaldar `tmp/db.sqlite3`, hoy irrecuperable | [backup-policy.md](09-infrastructure/backup-policy.md) |
 | 6 | Escribir el primer test: la lógica con más riesgo es `escapeLike()` | [test-strategy.md](08-quality/test-strategy.md) |
-| 7 | Capturar las plantillas de SKUs e Insumos | [features/README.md](features/README.md) |
+| 7 | Capturar la plantilla de Insumos (la de SKUs ya no existe: el sitio de Dentalia cambió de estructura) | [features/README.md](features/README.md) |
 | 8 | Validar el alcance con negocio | [product-brief.md](00-project/product-brief.md) |
 
 ## Cobertura documental
@@ -113,8 +115,8 @@ tabla de la autenticación.
 | `08-quality` | 7 | 7 |
 | `09-infrastructure` | 6 | 6 |
 | `10-operations` | 4 | 4 |
-| `features` | 6 | 6 |
+| `features` | 7 | 7 |
 
 Los documentos sin `## Brechas` son plantillas (`FLOW-000-template.md`, `ADR-000-template.md`,
-`FEATURE-000-template.md`), los índices de sección y los ADR, que en su lugar tienen la sección
-`## Revisión`.
+`FEATURE-000-template.md`), los índices de sección (`README.md`) y los ADR, que en su lugar tienen la
+sección `## Revisión`.

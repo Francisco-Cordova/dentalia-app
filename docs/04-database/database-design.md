@@ -51,6 +51,7 @@ El catálogo vive en PostgreSQL porque ya existe allí y no se replica (ver
 | `dev."Kits"` | supabase | Catálogo de kits: nombre, código de Odoo, costo, descripción y la lista de insumos que lo componen |
 | `dev."zonas"` | supabase | Catálogo de zonas: nombre y descripción. `costo` existe pero la app no lo expone |
 | `public.clinicas_zonas` | supabase | Relación zona↔clínica (`clinica_id`, `zona_id`): la app la cuenta para la columna "Clínicas" |
+| `dev."SKU"` | supabase | Catálogo de SKUs: nombre, ID de tratamiento, ID de SKU y la información financiera y de insumos que la app todavía no muestra (25 columnas en total) |
 | `dev.modulos_salud` | supabase | Catálogo de módulos de salud: nombre y descripción. `id_modulo` existe pero la app no lo expone |
 | `adonis_schema` / `adonis_schema_versions` | sqlite | Contabilidad interna de migraciones (Lucid). No es dominio |
 
@@ -65,12 +66,27 @@ El catálogo vive en PostgreSQL porque ya existe allí y no se replica (ver
 - `dev."Kits"` también es independiente: **no hay FK entre `Kits` e `Insumos`**. La relación se
   codifica dentro del propio texto de `"Insumos"`, como una lista de `DEFAULT_CODE` separados por
   coma. Consecuencia: no se puede validar en la base que un código exista, ni saber la cantidad de
-  cada insumo. El resto del catálogo —SKUs, familias— **no está modelado todavía**.
+  cada insumo. El resto del catálogo —familias— **no está modelado todavía**.
 - `public."Kits"` es una tabla distinta de `dev."Kits"`: una fila por par kit×insumo, con
   `id_kit`, `id_insumo`, `Cantidad requerida numero`, `Costo unitario` y `Usos`. Contiene la
   información de detalle que `dev."Kits"` no tiene. La aplicación no la consulta todavía.
 - `dev."zonas"` (2 filas, `id` 1 y 2) se lee para el catálogo de zonas. `public."zonas"` es un
   **duplicado exacto** (mismas columnas y filas), no una tabla de detalle como `public."Kits"`.
+- `dev."SKU"` (255 filas, `id` de 8 a 287) se lee para el catálogo de SKUs. Es el catálogo más
+  rico del sistema: 25 columnas con precios, comisiones, márgenes, costos y una lista de insumos en
+  texto. **`dev."SKU"` no tiene ninguna FK** que entre ni salga.
+  - `public."SKU"` **no es un duplicado exacto**: mismos 255 `id`, pero difieren 211 filas
+    (comparado con `EXCEPT` en ambos sentidos) **solo en las columnas de costo y margen**. El
+    `searchPath` pone `dev` primero y es la fuente documentada; ninguna columna visible hoy difiere
+    entre ambos esquemas.
+  - Las FKs hacia SKUs apuntan a **`public`, no a `dev`**: `public."Insumos_SKU"` (1,904 filas,
+    150 SKUs) y `public.precios_comisiones` (496 filas) referencian
+    `public."SKU"("ID tratamiento")`. La app no las consulta; si algún día quisiera contar insumos o
+    kits por SKU, tendría que unir contra `public`, no contra `dev`.
+  - La relación SKU↔insumo es de dos naturalezas y **no hay FK entre ellas**: `"Insumos"` guarda los
+    códigos de insumo en texto separado por coma (igual que `dev."Kits"`), mientras que
+    `public."Insumos_SKU"` es la tabla relacional con el detalle. El código apunta a un
+    `"ID tratamiento"` de `public."SKU"`, no a un `id` de `dev`.
 - `dev.modulos_salud` (10 filas, `id` 1 a 10) se lee para el catálogo de módulos de salud.
   `public.modulos_salud` es otro **duplicado exacto** (mismas 6 columnas y mismas 10 filas).
   La tabla **no tiene ninguna FK** que entre ni salga: no hay forma de saber cuántos SKUs tiene cada
@@ -151,19 +167,29 @@ pequeños.
   (no hay worker ni job) y sin índice que lo haga barato.
 - **`magic_links.user_id` es nullable**: el esquema lo permite aunque la aplicación siempre lo
   escriba. Nada impide un enlace huérfano por inserción directa.
-- **Los esquemas restantes del catálogo no están modelados** (SKUs, familias, usuarios de
-  negocio del catálogo externo): solo existen `dev."Insumos"`, `dev."Kits"`, `dev."zonas"` (con
-  `public.clinicas_zonas` para el conteo de clínicas) y `dev.modulos_salud`. El catálogo de
-  usuarios **no** viene de aquí: se lee `users` de SQLite, que es la tabla de la autenticación.
+- **Los esquemas restantes del catálogo no están modelados** (familias): solo existen
+  `dev."Insumos"`, `dev."SKU"`, `dev."Kits"`, `dev."zonas"` (con `public.clinicas_zonas` para el
+  conteo de clínicas) y `dev.modulos_salud`. El catálogo de usuarios **no** viene de aquí: se lee
+  `users` de SQLite, que es la tabla de la autenticación.
 - **No hay relación entre módulos de salud y SKUs**: `public."SKU"` no tiene columna ni FK hacia
   un módulo, así que el conteo de SKUs por módulo que muestra la referencia de diseño no es
   derivable. La pantalla muestra `0` como dato dummy.
+- **`dev."SKU"` y `public."SKU"` divergen en costos**: 211 filas difieren en las columnas de costo y
+  margen. Ninguna es visible hoy en `/skus`, así que no hay conflicto visible, pero cualquier
+  consulta futura a esas columnas tiene que declarar explícitamente qué esquema usa.
+- **El filtro de `"ID tratamiento"` necesita cast a texto**: la columna es `bigint` y PostgreSQL no
+  castea `bigint` a texto implícitamente. Sin `"ID tratamiento"::text` el `ILIKE` falla con
+  `operator does not exist: bigint ~~* unknown`.
 - **No hay réplicas ni caché**: cada lectura va a la fuente primaria (ver [ADR-004](../03-architecture/adr/ADR-004-catalogo-solo-lectura.md)).
 - El store `database` de sesión está declarado en `config/session.ts` pero **no es funcional**
   (falta la tabla `sessions`): un cambio de `SESSION_DRIVER` a `database` rompería el arranque.
 - Sin particionado ni retención; no es necesario al volumen actual.
 - El conteo de 5,060 filas de `dev."Insumos"`, 40 de `dev."Kits"`, 2 de `dev."zonas"` y 13 de
   `public.clinicas_zonas` quedó **verificado** el 2026-09-30 con `SELECT count(*)`.
+- El conteo de **255 filas de `dev."SKU"` y `public."SKU"`** quedó verificado el 2026-10-02 con
+  `SELECT count(*)`, junto con las columnas (`information_schema.columns`), las 2 constraints, la
+  divergencia de 211 filas entre ambos esquemas y los conteos de `public."Insumos_SKU"` (1,904) y
+  `public.kit_sku` (1,179).
 - El conteo de 10 filas de `dev.modulos_salud` (y su duplicado `public.modulos_salud`), los 255
   de `public."SKU"` y el 0 de `public.especialidades` quedó **verificado** el 2026-10-01.
 - El conteo de **`users` (SQLite) también quedó verificado el 2026-10-01: 1 fila**. Antes había

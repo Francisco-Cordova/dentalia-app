@@ -25,7 +25,8 @@ function countInsumos(raw: string | null) {
 
 export default class KitsController {
   async index({ inertia, request }: HttpContext) {
-    const page = Number(request.input('page', '1'))
+    const requestedPage = Number(request.input('page', '1'))
+    const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
     const perPage = 10
     const nombre = String(request.input('nombre', '') || '').trim()
     const codigo = String(request.input('codigo', '') || '').trim()

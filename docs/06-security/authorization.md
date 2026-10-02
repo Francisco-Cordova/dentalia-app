@@ -27,8 +27,8 @@ No hay Bouncer, ni policies, ni `authorize()`, ni scopes por usuario en Lucid.
 ## Consecuencia
 
 Cualquier persona autenticada puede ver **todas** las pantallas, incluidas las de administración
-(`/usuarios`, `/zonas`, `/modulos-de-salud`). No hay separación entre "administrador" y "consulta",
-aunque la taxonomía del panel sugiera esa distinción (sección "Admin" del sidebar).
+(`/usuarios`, `/zonas`, `/modulos-de-salud`, `/skus`). No hay separación entre "administrador" y
+"consulta", aunque la taxonomía del panel sugiera esa distinción (sección "Admin" del sidebar).
 
 `users` tiene columnas `area`, `rol` y `superadmin`, pero **no se leen para autorizar nada**: son
 datos que el catálogo de `/usuarios` muestra porque la referencia de diseño los trae. `superadmin`

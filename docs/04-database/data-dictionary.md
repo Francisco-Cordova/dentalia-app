@@ -170,10 +170,86 @@ no es derivable**: `dev.modulos_salud` no tiene FKs que entren ni salgan (verifi
 un módulo. La pantalla muestra `0` como dato dummy, declarado como constante `SKUS_DUMMY` en
 `inertia/pages/modulos_de_salud.tsx`.
 
+## `dev."SKU"`
+
+**255 filas**, `id` de 8 a 287 (disperso; los `id` 1-7 no existen), como `dev."Kits"`. Tabla y
+columnas en **mayúsculas y con espacios** (por eso el SQL las necesita entre comillas dobles).
+Claves: `sku_pkey` (PK `id`) y `sku_id_tratamiento_key` (`UNIQUE` sobre `"ID tratamiento"`).
+**Sin ninguna FK** que entre ni salga. Se lee para el catálogo de SKUs.
+
+De las 25 columnas, el modelo `app/models/sku.ts` **declara solo 4**: las que la pantalla necesita.
+
+| # | Columna | Tipo (PostgreSQL) | Nulo | Clave | Mapeo a la app | Descripción |
+|---|---|---|---|---|---|---|
+| 1 | `id` | `bigint` | no | PK | `id` | Clave del modelo, dispersa |
+| 2 | `created_at` | `timestamptz` `NOT NULL DEFAULT now()` | no | — | — | **No se declara ni se muestra**: la etiqueta "Última actualización" del pie es dummy |
+| 3 | `sesiones` | `bigint` | sí | — | — | No se declara. Rango 1 a 6 |
+| 4 | `Comision Naciona especialista` | `real` | sí | — | — | No se declara |
+| 5 | `Comision Naciona og` | `real` | sí | — | — | No se declara |
+| 6 | `Comision Turista especialista` | `real` | sí | — | — | No se declara |
+| 7 | `Comision Turista og` | `real` | sí | — | — | No se declara |
+| 8 | `Costo Nacional espcialista` | `real` | sí | — | — | No se declara. Ojo al nombre: `espcialista`, sin la "e" |
+| 9 | `Costo Nacional og` | `real` | sí | — | — | No se declara |
+| 10 | `Costo Turista especialista` | `real` | sí | — | — | No se declara |
+| 11 | `Costo Turista og` | `real` | sí | — | — | No se declara |
+| 12 | `Insumos` | `text` | sí | — | — | No se declara ni se muestra. Lista de códigos separados por coma (14 `NULL`, un valor `"0"`) |
+| 13 | `Margen Nacional especialista` | `real` | sí | — | — | No se declara |
+| 14 | `Margen Nacional og` | `real` | sí | — | — | No se declara |
+| 15 | `Margen Turista especialista` | `real` | sí | — | — | No se declara |
+| 16 | `Margen Turista og` | `real` | sí | — | — | No se declara |
+| 17 | `Nombre` | `text` | sí | — | `nombre` | Nombre del tratamiento, mostrado en la primera columna. 255 valores distintos |
+| 18 | `Pasa por lab` | `text` | sí | — | — | No se declara. **Texto sucio**: `no` 127, `false` 71, `yes` 44, `NULL` 13 (tres escrituras de "no") |
+| 19 | `Costo laboratorio` | `real` | sí | — | — | No se declara |
+| 20 | `Precio Nacional` | `real` | sí | — | — | No se declara. 17 `NULL`; solo **34 de 255 filas** con valor ≠ 0 (rango 0-51,800) |
+| 21 | `Precio Turista` | `real` | sí | — | — | No se declara |
+| 22 | `ID SKU` | `text` | sí | — | `codigo` | Texto tipo `'2.3'`. **No es único**: 253 distintos en 255 filas |
+| 23 | `ID tratamiento` | `bigint` | no | `UNIQUE` | `tratamiento` | Identificador del tratamiento, mostrado como `Tratamiento {n}` en el subtexto |
+| 24 | `Sesion se paga` | `bigint` | sí | — | — | No se declara. Contiene un valor absurdo: `1111` |
+| 25 | `Costo insumos` | `real` | sí | — | — | No se declara |
+
+### Mapeo de búsqueda
+Los 3 buscadores de `/skus` filtran con `ilike` y `%`/`_` escapados (`escapeLike()`):
+
+| Query param | Columna | Nota |
+|---|---|---|
+| `nombre` | `"Nombre"` | — |
+| `tratamiento` | `"ID tratamiento"::text` | **El cast es obligatorio**: `bigint` no se castea a texto implícitamente y el `ILIKE` directo falla con `operator does not exist: bigint ~~* unknown`. También habilita la coincidencia parcial |
+| `codigo` | `"ID SKU"` | Ya es `text`, sin cast |
+
+Orden ascendente por `id`.
+
+### `public."SKU"` no es un duplicado exacto
+Existe y tiene **255 filas con los mismos 255 `id`**, pero `EXCEPT` en ambos sentidos devuelve **211
+filas distintas**. La diferencia está **solo en las columnas de costo y margen**:
+
+| Columna(s) | Filas que difieren |
+|---|---|
+| `"Costo Nacional og"`, `"Costo Nacional espcialista"`, `"Costo Turista og"`, `"Costo Turista especialista"` | 210 |
+| `"Costo insumos"` | 206 |
+| `"Margen Nacional og"`, `"Margen Nacional especialista"`, `"Margen Turista og"`, `"Margen Turista especialista"` | 206 |
+| `"Costo laboratorio"` | 1 |
+
+Idénticos en ambos esquemas: `id`, `"Nombre"`, `"ID SKU"`, `"ID tratamiento"`, `created_at`,
+`sesiones`, `"Sesion se paga"`, `"Insumos"`, `"Pasa por lab"`, los 4 `"Comision *"` y los 2
+`"Precio *"`. Ninguna columna visible hoy difiere, así que invertir el `searchPath` no cambiaría lo
+que ve el usuario, pero sí dejaría de leer la tabla documentada.
+
+### Tablas que apuntan a `public."SKU"`
+Dos FKs hacia `public."SKU"("ID tratamiento")` (**no** hacia `dev."SKU"`):
+
+| Tabla | Filas | SKUs distintos | Qué sería |
+|---|---|---|---|
+| `public."Insumos_SKU"` | 1,904 | 150 | Conteo de insumos por SKU. **No se usa**: la tabla no tiene esa columna |
+| `public.precios_comisiones` | 496 | — | No se usa |
+| `public.kit_sku` | 1,179 | 209 | Conteo de kits por SKU. **No se usa** |
+
+`public.familias` y `public.especialidades` tienen **0 filas** y ninguna FK las conecta con `SKU`, así
+que las columnas `Familia` y `Especialidad` de la pantalla no son derivables (hoy muestran `—`).
+
 ## Esquemas del catálogo no modelados
 
-`SKUs`, `Familias` y `Usuarios` **no tienen modelo Lucid**: sus pantallas son
-maquetas con `{}` como props. No se documenta aquí lo que no se conoce desde el código.
+`Familias` **no tiene modelo Lucid**: su pantalla es una maqueta con `{}` como props. No se documenta
+aquí lo que no se conoce desde el código.
 
 ---
 

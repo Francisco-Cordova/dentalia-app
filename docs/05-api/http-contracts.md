@@ -93,9 +93,43 @@ Los filtros se aplican **en conjunto** (AND). `escapeLike()` escapa `%` y `_`.
   SQLite necesita la cláusula `ESCAPE` explícita para que el backslash de `escapeLike()` funcione.
 - No hay ruta de escritura: POST, PUT, DELETE y PATCH sobre `/usuarios` devuelven 404.
 
+## `GET /skus` - listado del catálogo de SKUs
+
+### Entrada (query string)
+
+| Param | Tipo | Comportamiento |
+|---|---|---|
+| `page` | número | Página de 10; fuera de rango devuelve la página vacía con su número |
+| `nombre` | texto | Filtra `"Nombre"` con `ILIKE` escapado |
+| `tratamiento` | texto | Filtra `"ID tratamiento"::text` con `ILIKE` escapado (coincidencia **parcial**) |
+| `codigo` | texto | Filtra `"ID SKU"` con `ILIKE` escapado |
+
+Los tres filtros son **combinables e independientes** (se combinan con `AND`).
+
+### Salida (`inertia.render('skus', {...})`)
+
+| Prop | Tipo | Nota |
+|---|---|---|
+| `skus` | `array` | `id`, `nombre`, `tratamiento` (string), `codigo`. Solo 4 de las 25 columnas de `dev."SKU"` |
+| `total` | número | Total **filtrado** (255 sin filtros) |
+| `page` / `lastPage` | número | Planos, igual que el resto de catálogos |
+| `nombre` / `tratamiento` / `codigo` | `string \| null` | Vuelven `null` si no hay término |
+
+- `tratamiento` viaja como **string** aunque la columna sea `bigint`: la página lo interpola tal cual
+  en el subtexto `Tratamiento {n}`.
+- `codigo` es texto tipo `'2.3'` y **no es único** (253 distintos en 255 filas), así que un mismo
+  filtro puede devolver varias filas.
+- El filtro `tratamiento` **exige el cast**: `"ID tratamiento"::text`. Sin él, PostgreSQL responde
+  `operator does not exist: bigint ~~* unknown` (verificado el 2026-10-02).
+- Las columnas `Tipo`, `Estatus`, `Familia`, `Especialidad` y `Módulo de salud` **no llegan como
+  props**: son constantes del frontend (`TIPO_DUMMY`, `ESTATUS_DUMMY`, `SIN_DATO_DUMMY`), porque no
+  son derivables de la base.
+- No hay ruta de escritura ni de detalle: POST, PUT, DELETE y PATCH sobre `/skus` devuelven 404, y la
+  acción por fila no navega.
+
 ## Contratos de las páginas mock
 
-Las páginas que siguen mock (`/skus`, `/familias`, `/home`) se sirven con
+Las páginas que siguen mock (`/familias`, `/home`) se sirven con
 `renderInertia('<nombre>', {})`: sin props de negocio. La UI muestra estructura fija.
 `inertia/pages/` contiene 12 páginas (8 del panel, 2 de auth, 2 de error).
 
@@ -111,7 +145,7 @@ Las páginas que siguen mock (`/skus`, `/familias`, `/home`) se sirven con
 | `POST /signup` con correo duplicado | 422 (errores de validación) | `signupValidator` |
 | Logout correcto | 302 → `/` | `session_controller.ts:20` |
 | Logout sin XSRF | 302 atrás + flash error; **sesión intacta** | `@adonisjs/shield` |
-| `POST /skus` (método no permitido) | 404 | `router.on` solo registra GET |
+| `POST /skus` (método no permitido) | 404 | `router.get` solo registra GET |
 | 404 en DEV | 404 + página de depuración (~52 KB) | `handler.ts:17` `renderStatusPages = app.inProduction` |
 | 404 en producción | 404 + `errors/not_found` | `handler.ts:24` |
 

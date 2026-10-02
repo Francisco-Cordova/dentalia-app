@@ -12,17 +12,18 @@ Crear un archivo por flujo relevante. Incluir actor, precondiciones, flujo princ
 | [FLOW-AUT-001](FLOW-AUT-001.md) | Acceso al panel mediante enlace de un solo uso | RF-AUT-001, RF-AUT-002, RF-AUT-003 | ANALYZED |
 | [FLOW-INS-001](FLOW-INS-001.md) | Consultar el catálogo de insumos | RF-INS-001 … RF-INS-005 | ANALYZED |
 | [FLOW-KIT-001](FLOW-KIT-001.md) | Consultar el catálogo de kits | RF-KIT-001 … RF-KIT-006 | ANALYZED |
+| [FLOW-SKU-001](FLOW-SKU-001.md) | Consultar el catálogo de SKUs | RF-SKU-001 … RF-SKU-004 | ANALYZED |
 | [FLOW-ZON-001](FLOW-ZON-001.md) | Consultar el catálogo de zonas | RF-ZON-001 … RF-ZON-003 | ANALYZED |
 | [FLOW-MSD-001](FLOW-MSD-001.md) | Consultar el catálogo de módulos de salud | RF-MSD-001 … RF-MSD-003 | ANALYZED |
 | [FLOW-USR-001](FLOW-USR-001.md) | Consultar el catálogo de usuarios | RF-USR-001 … RF-USR-003 | ANALYZED |
 
 ## Por qué no hay más flujos
 
-Solo hay seis porque solo hay seis módulos con comportamiento. Las otras dos pantallas
-(`SKU` y `FAM`) importan arrays literales desde el propio `.tsx`: sin
-modelo, sin migración y sin controller **no hay flujo que documentar**, solo un render estático.
+Solo hay siete porque solo hay siete módulos con comportamiento. La otra pantalla (`FAM`) importa un
+array literal desde el propio `.tsx`: sin modelo, sin migración y sin controller **no hay flujo que
+documentar**, solo un render estático.
 
-Documentar un "alta de SKU" cuando no existe un modelo de SKU sería inventar funcionalidad. Las
+Documentar un "alta de familia" cuando no existe un modelo sería inventar funcionalidad. Las
 preguntas que hay que responder para poder escribir esos flujos están en
 [módulos sin requisitos](../../01-requirements/modulos-pendientes.md).
 
@@ -32,9 +33,10 @@ Al abrir la feature correspondiente:
 
 | Flujo previsto | Requisitos | Depende de |
 |---|---|---|
-| Alta y edición de SKU | RF-SKU-* | Decidir dónde viven los datos y quién escribe |
+| Alta y edición de SKU | RF-SKU-* | La lectura ya existe (FLOW-SKU-001). Falta decidir quién escribe SKUs y si el catálogo se administra desde esta app o fuera |
 | Alta de familia | RF-FAM-* | Definir qué es una familia y su relación con los insumos |
 | Alta de kit | RF-KIT-* | El precio ya se resolvió: es una columna almacenada, no se calcula. Falta decidir quién escribe y qué tabla relaciona cada kit con sus insumos |
+| Detalle de SKU | RF-SKU-* | La acción por fila de `/skus` es maqueta: no hay ruta de detalle |
 | Edición de usuarios | RF-USR-* | La lectura ya existe (FLOW-USR-001). Falta **decidir quién da de alta a los usuarios**: es el bloqueo principal |
 | Alta de zona | RF-ZON-* | La lectura ya existe (FLOW-ZON-001). Falta decidir quién escribe zonas y quién asigna clínicas |
 | Alta de módulo de salud | RF-MSD-* | La lectura ya existe (FLOW-MSD-001). Falta definir el concepto en el negocio y decidir quién escribe |

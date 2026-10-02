@@ -73,5 +73,8 @@ Sin implementar:
   `DONE` no puede ser objetiva. Las features marcadas `DONE` lo están por decisión de desarrollo.
 - **No hay ambiente de pruebas**: imposible validar nada que no sea el entorno local.
 - **No hay participantes identificados**: nadie del negocio ha definido qué necesita.
-- **Las features están en `DONE` sin UAT**: el ciclo de vida documentado salta de `ANALYZED` a
-  `DONE` saltándose la validación.
+- **Las features están en `DONE` sin UAT formal**: el ciclo de vida documentado salta de `READY` a
+  `DONE` sin pasar por `CODE REVIEW` ni por UAT con alguien de negocio. Hay 6 features en `DONE`
+  (001, 002, 003, 005, 007 y 008) y su evidencia es técnica: revisión manual del desarrollador en el
+  navegador y scripts de humo. `FEATURE-006` (usuarios) sí quedó en `UAT` a la espera de esa
+  revisión, pero sigue sin haber nadie de negocio que la haga.

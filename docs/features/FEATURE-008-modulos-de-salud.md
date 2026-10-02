@@ -1,7 +1,10 @@
 # FEATURE-008 · Módulos de salud
 
 ## Estado
-READY
+DONE
+
+Los AC ya estaban cerrados y `Pruebas aprobadas` marcado desde la implementación; el `READY` había
+quedado desactualizado. Se corrigió el 2026-10-02 al revisar los estados junto con FEATURE-003.
 
 ## Objetivo
 Consultar el catálogo de módulos de salud del sistema de origen (Supabase/PostgreSQL) dentro del

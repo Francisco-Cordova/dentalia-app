@@ -10,6 +10,7 @@ export const controllers = {
   ModulosSalud: () => import('#controllers/modulos_salud_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
   Session: () => import('#controllers/session_controller'),
+  Skus: () => import('#controllers/skus_controller'),
   Usuarios: () => import('#controllers/usuarios_controller'),
   Zonas: () => import('#controllers/zonas_controller'),
 }

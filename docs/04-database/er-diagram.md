@@ -137,6 +137,35 @@ flowchart LR
 - Ojo: la FK de `zona_id` apunta a `public."zonas"`, no a `dev."zonas"`. Hoy son idénticas, pero
   son tablas distintas: si Odoo escribiera en una sola, el conteo y el listado podrían divergir.
 
+### `SKU`: entidad casi aislada, con 2 FKs entrantes desde `public`
+
+```mermaid
+flowchart LR
+    S["dev.SKU 255 filas<br/>id 8..287, Nombre,<br/>ID tratamiento UNIQUE, ID SKU"]
+    PS["public.SKU 255 filas<br/>mismos id, distinto costo/margen"]
+    IS["public.INSUMOS_SKU 1,904 filas<br/>id_tratamiento -> 150 SKUs"]
+    PC["public.PRECIOS_COMISIONES 496 filas"]
+    KS["public.KIT_SKU 1,179 filas<br/>209 SKUs"]
+    S -->|"mismo id, distinto<br/>Costo/Margen"| PS
+    PS -->|"FK id_tratamiento"| IS
+    PS -->|"FK id_tratamiento"| PC
+    KS -.->|"id_tratamiento sin FK"| PS
+```
+
+- `dev."SKU"` **no tiene ninguna FK** que entre ni salga (verificado en `information_schema`); solo
+  `sku_pkey` y `sku_id_tratamiento_key` (`UNIQUE`).
+- **Las FKs del entorno apuntan a `public`, no a `dev`**: `public."Insumos_SKU"` y
+  `public.precios_comisiones` referencian `public."SKU"("ID tratamiento")`. `public.kit_sku` trae
+  `id_tratamiento` pero **sin FK declarada**.
+- La app lee `dev."SKU"` y **no consulta ninguna de las 3 tablas de detalle**: hoy no muestra
+  conteo de insumos ni de kits.
+- La relación SKU↔insumo existe además **dentro de un texto**: la columna `"Insumos"` de
+  `dev."SKU"` guarda los códigos separados por coma (igual que `dev."Kits"`), sin FK ni validación.
+- `dev."SKU"` y `public."SKU"` tienen los mismos 255 `id` pero **difieren 211 filas** en las columnas
+  de costo y margen. Ninguna columna visible en `/skus` difiere entre ambos.
+- `Familia`, `Especialidad` y `Módulo de salud` **no son entidades**: `public.familias` y
+  `public.especialidades` existen pero tienen **0 filas**, y no hay FK que las conecte con `SKU`.
+
 ### `MODULOS_SALUD`: entidad aislada, sin relación con los SKUs
 
 ```mermaid
@@ -158,10 +187,13 @@ flowchart LR
 
 | Concepto de la UI | ¿Entidad? | Nota |
 |---|---|---|
-| SKU | **No** | Pantalla `skus` con props `{}` |
-| Familia | **No** | Pantalla `familias` con props `{}` |
+| ~~SKU~~ **Sí existe** | **Sí** | `dev."SKU"` (255 filas) y `public."SKU"`. La app lee `dev` y solo 4 de sus 25 columnas. Ver arriba |
+| Familia | **No** | Pantalla `familias` con props `{}`. `public.familias` existe pero tiene **0 filas** |
 | Detalle de insumos por kit | **No** | Existe `public."Kits"` en Supabase (con cantidades), pero la app solo lee `dev."Kits"` |
-| Usuario de negocio (del catálogo) | **No** | `users` es solo auth; la pantalla `usuarios` está vacía |
+| Detalle de insumos por SKU | **No (aún)** | Existe `public."Insumos_SKU"` (1,904 filas) pero la app no la consulta |
+| Detalle de kits por SKU | **No (aún)** | Existe `public.kit_sku` (1,179 filas) pero la app no la consulta |
+| Especialidad | **No** | `public.especialidades` existe pero tiene **0 filas** y ninguna FK hacia `SKU` |
+| Usuario de negocio (del catálogo) | **No** | `users` es solo auth; la pantalla `usuarios` lee `users` de SQLite, no el catálogo |
 | Clínica | **No** | `public."clinicas"` existe y es el destino de la FK de `clinicas_zonas`, pero la app no la consulta |
 | Sesión | **No** | `SESSION_DRIVER=cookie`: vive en una cookie cifrada, no en una tabla |
 

@@ -38,7 +38,7 @@ Lo que sí existe y es JSON:
 
 | Método | Ruta | Nombre | Handler | Props |
 |---|---|---|---|---|
-| GET | `/skus` | `skus` | `renderInertia` | `{}` (mock) |
+| GET | `/skus` | `skus` | `SkusController.index` | `skus[]`, `total`, `page`, `lastPage`, `nombre`, `tratamiento`, `codigo` |
 | GET | `/familias` | `familias` | `renderInertia` | `{}` (mock) |
 | GET | `/insumos` | `insumos` | `InsumosController.index` | `insumos`, `total`, `page`, `lastPage`, `nombre`, `codigo` |
 | GET | `/kits` | `kits` | `KitsController.index` | `kits[]`, `total`, `page`, `lastPage`, `nombre`, `codigo` |
@@ -49,12 +49,16 @@ Lo que sí existe y es JSON:
 | POST | `/logout` | `session.destroy` | `SessionController.destroy` | 302 a `/` |
 
 Las páginas que siguen en mock registran **solo GET** vía `router.on(...)`: se verificó que POST,
-PUT, DELETE y PATCH devuelven 404. `/insumos`, `/kits`, `/zonas`, `/modulos-de-salud` y `/usuarios`
-usan `router.get(...)` con un handler, y tampoco aceptan más métodos.
+PUT, DELETE y PATCH devuelven 404. `/skus`, `/insumos`, `/kits`, `/zonas`, `/modulos-de-salud` y
+`/usuarios` usan `router.get(...)` con un handler, y tampoco aceptan más métodos.
 
 Query params de `/insumos` y `/kits`: `page`, `nombre`, `codigo`. De `/zonas` y
-`/modulos-de-salud`: `page`, `nombre`. De `/usuarios`: `page`, `q` (un solo buscador que compara
-contra nombre **o** correo).
+`/modulos-de-salud`: `page`, `nombre`. De `/skus`: `page`, `nombre`, `tratamiento`, `codigo` (tres
+buscadores combinables). De `/usuarios`: `page`, `q` (un solo buscador que compara contra nombre
+**o** correo).
+
+`/skus` selecciona 4 de las 25 columnas de `dev."SKU"` (`id`, `Nombre`, `ID tratamiento`,
+`ID SKU`): el resto no viaja al navegador.
 
 `/usuarios` no devuelve `password` aunque la columna sea `NOT NULL`: el controller selecciona los
 campos uno a uno en vez de pedir `SELECT *`.

@@ -25,22 +25,22 @@ y listar **qué hace falta saber** para poder especificarlas.
 |---|---|---|---|---|---|
 | `AUT` | Autenticación | `/`, `/signup`, `/auth/magic/:token` | Real | RF-AUT-001…003 | FEATURE-002 `DONE` |
 | `INS` | Catálogo de insumos | `/insumos` | Real | RF-INS-001…005 | FEATURE-001 `DONE` |
-| `SKU` | SKUs | `/skus` | Maqueta | RF-SKU-001 *reservado* | FEATURE-003 `DRAFT` |
+| `SKU` | SKUs | `/skus` | Real | RF-SKU-001…004 | FEATURE-003 `DONE` |
 | `FAM` | Familias | `/familias` | Maqueta | RF-FAM-001 *reservado* | FEATURE-004 `DRAFT` |
-| `KIT` | Kits de insumos | `/kits` | Real | RF-KIT-001…006 | FEATURE-005 `READY` |
-| `USR` | Usuarios | `/usuarios` | Real | RF-USR-001…003 | FEATURE-006 `READY` |
-| `ZON` | Zonas | `/zonas` | Real | RF-ZON-001…003 | FEATURE-007 `READY` |
-| `MSD` | Módulos de salud | `/modulos-de-salud` | Real | RF-MSD-001…003 | FEATURE-008 `READY` |
+| `KIT` | Kits de insumos | `/kits` | Real | RF-KIT-001…006 | FEATURE-005 `DONE` |
+| `USR` | Usuarios | `/usuarios` | Real | RF-USR-001…003 | FEATURE-006 `UAT` |
+| `ZON` | Zonas | `/zonas` | Real | RF-ZON-001…003 | FEATURE-007 `DONE` |
+| `MSD` | Módulos de salud | `/modulos-de-salud` | Real | RF-MSD-001…003 | FEATURE-008 `DONE` |
 
 ## Por qué no hay requisitos
 
 | Motivo | Evidencia |
 |---|---|
-| Las páginas importan arrays literales desde el propio `.tsx` | `inertia/pages/skus.tsx`, `familias.tsx` |
-| No hay modelo Lucid para ninguno | `app/models/` tiene `user.ts`, `magic_link.ts`, `insumo.ts`, `kit.ts`, `zona.ts`, `modulos_salud.ts` |
+| Las páginas importan arrays literales desde el propio `.tsx` | `inertia/pages/familias.tsx` (a `skus.tsx` le sobró al pasar a datos reales el 2026-10-02) |
+| No hay modelo Lucid para ninguno | `app/models/` tiene `user.ts`, `magic_link.ts`, `insumo.ts`, `kit.ts`, `zona.ts`, `modulos_salud.ts`, `sku.ts` |
 | No hay migración que cree sus tablas | `database/migrations/` tiene `users`, `magic_links` y el añadido de `area`/`rol`/`superadmin` |
-| No hay controller | `app/controllers/` tiene `insumos`, `kits`, `zonas`, `modulos_salud`, `usuarios`, `magic_link`, `new_account`, `session` |
-| Los buscadores y la paginación son controles sin comportamiento | Solo `/insumos`, `/kits`, `/zonas`, `/modulos-de-salud` y `/usuarios` conectan su `onKeyDown` y su paginación |
+| No hay controller | `app/controllers/` tiene `insumos`, `kits`, `zonas`, `modulos_salud`, `usuarios`, `skus`, `magic_link`, `new_account`, `session` |
+| Los buscadores y la paginación son controles sin comportamiento | Solo `/insumos`, `/kits`, `/zonas`, `/modulos-de-salud`, `/usuarios` y `/skus` conectan su `onKeyDown` y su paginación |
 | No hay reglas de negocio conocidas | No existe un documento de negocio en el repositorio |
 
 ## Qué hay que saber para especificar cada módulo
@@ -49,13 +49,24 @@ Preguntas bloqueantes. Mientras no se respondan, el requisito no se puede redact
 
 ### `SKU` · FEATURE-003
 
-| # | Pregunta |
-|---|---|
-| 1 | ¿El SKU se guarda en Supabase o en la base de datos de la aplicación? Hoy el catálogo es externo y de solo lectura (ADR-004) |
-| 2 | ¿Qué diferencia un SKU de un insumo? ¿Un SKU es un insumo con variantes (medida, presentación)? |
-| 3 | ¿Quién lo crea y quién lo edita? No hay roles (ver [roles y permisos](../06-security/roles-permissions.md)) |
-| 4 | ¿Qué columnas tiene? Sin esto, `app/models/sku.ts` no se puede escribir |
-| 5 | ¿Qué significan exactamente "Familias", "Kits" y "Zonas" en este negocio? El [glosario](../00-project/glossary.md) lo deja como provisional |
+[FEATURE-003](../features/FEATURE-003-skus.md) cubre el listado real desde `dev."SKU"`. Las
+preguntas quedan así:
+
+| # | Pregunta | Estado |
+|---|---|---|
+| 1 | ¿El SKU se guarda en Supabase o en la base de datos de la aplicación? | **Respondida (parcial).** Vive en Supabase, en el esquema `dev`, tabla `dev."SKU"` (255 filas, solo lectura, igual que ADR-004). No hay tabla equivalente en SQLite |
+| 2 | ¿Qué diferencia un SKU de un insumo? | **Abierta.** La tabla sugiere que un SKU es un *tratamiento* del catálogo (tiene `"Precio Nacional"`, `"Precio Turista"`, comisiones y márgenes) que consume una lista de insumos en la columna de texto `"Insumos"`, mientras que `dev."Insumos"` es el artículo de inventario con cantidad y costo unitario. Nadie lo ha confirmado |
+| 3 | ¿Quién lo crea y quién lo edita? | **Abierta.** No hay roles (ver [roles y permisos](../06-security/roles-permissions.md)); `middleware.auth()` sigue siendo el único control |
+| 4 | ¿Qué columnas tiene? | **Respondida.** 25 columnas, majorityúsculas y con espacios; ver la sección de datos de [FEATURE-003](../features/FEATURE-003-skus.md). La pantalla solo usa 4 |
+| 5 | ¿Qué significan exactamente "Familias", "Kits" y "Zonas" en este negocio? | **Abierta.** Para SKUs se añadió que `Familia`, `Especialidad` y `Módulo de salud` **no son derivables**: no hay columna ni FK, y `public.familias` y `public.especialidades` tienen 0 filas. Quedan como dummy `—` |
+
+Preguntas nuevas que dejó la implementación:
+
+| # | Pregunta | Estado |
+|---|---|---|
+| 6 | ¿La etiqueta "Ultima actualización 14/07 10:59" del pie corresponde a este catálogo? | **Abierta.** El usuario respondió que "esa etiqueta es de otra cosa" y se mantiene como dummy, pero `dev."SKU"."created_at"` sí existe (2025-09-18 a 2026-09-28) y se podría mostrar real |
+| 7 | ¿Debe la tabla mostrar la información financiera del SKU? | **Abierta.** Precios, comisiones y márgenes están en la tabla y no se muestran; además solo **34 de 255 filas** tienen `"Precio Nacional"` distinto de cero, así que hoy se verían casi todas en `$0.00` |
+| 8 | ¿Debe mostrarse el conteo de insumos o kits por SKU? | **Abierta.** Se podría contar vía `public."Insumos_SKU"` (1,904 filas, 150 SKUs) y `public.kit_sku` (1,179 filas, 209 SKUs), ambos con FK a `public."SKU"."ID tratamiento"`. El usuario decidió no agregarlas |
 
 ### `FAM` · FEATURE-004
 
@@ -134,7 +145,7 @@ habrá entre un módulo y sus SKUs.
 |---|---|
 | 1 | ¿Dónde viven los datos: en Supabase o en una base nueva de la aplicación? |
 | 2 | ¿Quién puede escribir? Sin roles no hay respuesta |
-| 3 | ¿Se necesita `Plantillas/` de SKUs e Insumos? Hoy faltan, y son las dos pantallas más importantes |
+| 3 | ¿Se necesita `Plantillas/` de SKUs, Insumos y Familias? | **Respondida para SKUs: no hay y no habrá referencia.** El usuario confirmó (2026-10-02) que el sitio de Dentalia cambió de estructura, así que la maqueta ya construida de `/skus` fue la fuente de verdad del diseño. Siguen faltando Insumos y Familias |
 | 4 | ¿El flujo de alta exige verificación de correo, como sí hace `POST /signup`? |
 
 ## Criterio para reabrir esta brecha
@@ -160,15 +171,17 @@ Mientras tanto, la regla de `features/README.md` sigue aplicando: **no implement
 
 ## Brechas
 
-- **Dos de ocho módulos de dominio sin requisito** (`SKU`, `FAM`): la brecha
-  está declarada y con su causa identificada, no cerrada de hecho. `KIT`, `ZON`, `MSD` y `USR`
-  dejaron de estar aquí: tienen tabla, requisitos y lectura real, aunque su escritura sigue sin
-  decidir.
+- **Uno de ocho módulos de dominio sin requisito** (`FAM`): la brecha está declarada y con su causa
+  identificada, no cerrada de hecho. `SKU` dejó de estar aquí el 2026-10-02 (FEATURE-003 `DONE`
+  con lectura real de `dev."SKU"`); `KIT`, `ZON`, `MSD` y `USR` también tienen tabla, requisitos y
+  lectura real, aunque su escritura sigue sin decidir.
 - **La pregunta sobre quién da de alta usuarios está sin respuesta desde el primer día**: sin ella,
-  el producto no es utilizable por nadie ajeno a quien mantiene la base de datos.
+  el producto no es utilizable por nadie ajeno a quien mantiene la base de datos. Lo mismo aplica
+  al alta de SKUs.
 - **No hay documento de negocio**: todas las preguntas de este documento llevan a la misma raíz, que
   no es técnica.
-- **`Plantillas/` está incompleta**: faltan las referencias de SKUs e Insumos, las dos pantallas más
-  importantes. Sin ellas, la fidelidad visual de esas secciones no se puede verificar.
-- **Los requisitos reservados son un solo ID por módulo**: cuando se aborden, habrá que asignar
-  varios (`RF-SKU-001`, `RF-SKU-002`…), no encajar todo en uno.
+- **`Plantillas/` está incompleta y para SKUs es irrelevante**: faltan las referencias de Insumos y
+  Familias, y el usuario confirmó que la de SKUs ya no existe porque el sitio cambió de estructura.
+  En `/skus` eso dejó 5 columnas sin origen verificable (ver FEATURE-003).
+- **`/skus` se implementó sin plantilla** y con 5 de 7 columnas dummy: si más adelante aparece el
+  HTML real, hay que revalidar las cabeceras y los 3 buscadores.

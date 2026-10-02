@@ -19,9 +19,9 @@ tiene un sentido de mercado distinto del de aquí, se indica.
 | **Catálogo** | Listado de productos que la clínica puede comprar. En el sistema, la tabla `dev."Insumos"` | `INS` |
 | **Insumo** | Fila del catálogo: un producto con nombre, código, marca, cantidad y costo | `INS` |
 | **Código** | Identificador de negocio del insumo. En la BD es la columna `DEFAULT_CODE`, **no** `ID` | `INS` |
-| **SKU** | Unidad de inventario con variantes. Hoy es una pantalla sin datos | `SKU` |
+| **SKU** | Unidad de inventario con variantes. Catálogo real en `dev."SKU"` (255 filas, 25 columnas); la definición exacta sigue siendo provisional. La pantalla muestra 7 columnas, de las cuales solo `Nombre` (con sus dos IDs) tiene dato real | `SKU` |
 | **Familia** | Agrupación de productos. Hoy es una pantalla sin datos | `FAM` |
-| **Kit** | Conjunto de insumos que se venden juntos. Hoy es una pantalla sin datos | `KIT` |
+| **Kit** | Conjunto de insumos que se venden juntos. Catálogo real en `dev."Kits"` (40 filas) | `KIT` |
 | **Zona** | Agrupación geográfica o de sucursal. Catálogo real en `dev."zonas"` (2 filas: Turista, Nacional); la definición exacta sigue siendo provisional | `ZON` |
 | **Módulo de salud** | Agrupación de productos por especialidad clínica. Catálogo real en `dev.modulos_salud` (10 filas: PERIODONCIA, ORTODONCIA, ENDODONCIAS…); su definición exacta sigue siendo provisional | `MSD` |
 | **Dentalia** | Nombre de la marca cuyo catálogo público se replica como referencia de diseño | `ADM`, `Plantillas/` |

@@ -21,7 +21,8 @@ function escapeLike(term: string) {
  */
 export default class UsuariosController {
   async index({ inertia, request }: HttpContext) {
-    const page = Number(request.input('page', '1'))
+    const requestedPage = Number(request.input('page', '1'))
+    const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
     const perPage = 10
     const q = String(request.input('q', '') || '').trim()
 

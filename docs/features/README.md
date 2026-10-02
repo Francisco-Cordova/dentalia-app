@@ -25,28 +25,30 @@ Copiar `FEATURE-000-template.md`, asignar ID y completar el checklist `Ready for
 |---|---|---|---|
 | [FEATURE-001](FEATURE-001-catalogo-insumos.md) | Catálogo de insumos | DONE | RF-INS-001 … RF-INS-005 |
 | [FEATURE-002](FEATURE-002-autenticacion-magic-link.md) | Autenticación por enlace mágico | DONE | RF-AUT-001 … RF-AUT-003 |
-| FEATURE-003 | SKUs | DRAFT | RF-SKU-001 (reservado) |
+| [FEATURE-003](FEATURE-003-skus.md) | SKUs | DONE | RF-SKU-001 … RF-SKU-004 |
 | FEATURE-004 | Familias | DRAFT | RF-FAM-001 (reservado) |
-| [FEATURE-005](FEATURE-005-kits-de-insumos.md) | Kits de insumos | READY | RF-KIT-001 … RF-KIT-006 |
-| [FEATURE-006](FEATURE-006-usuarios.md) | Usuarios | READY | RF-USR-001 … RF-USR-003 |
-| [FEATURE-007](FEATURE-007-catalogo-zonas.md) | Catálogo de zonas | READY | RF-ZON-001 … RF-ZON-003 |
-| [FEATURE-008](FEATURE-008-modulos-de-salud.md) | Módulos de salud | READY | RF-MSD-001 … RF-MSD-003 |
+| [FEATURE-005](FEATURE-005-kits-de-insumos.md) | Kits de insumos | DONE | RF-KIT-001 … RF-KIT-006 |
+| [FEATURE-006](FEATURE-006-usuarios.md) | Usuarios | UAT | RF-USR-001 … RF-USR-003 |
+| [FEATURE-007](FEATURE-007-catalogo-zonas.md) | Catálogo de zonas | DONE | RF-ZON-001 … RF-ZON-003 |
+| [FEATURE-008](FEATURE-008-modulos-de-salud.md) | Módulos de salud | DONE | RF-MSD-001 … RF-MSD-003 |
 
 ## Identificadores reservados
 
-`FEATURE-003` y `FEATURE-004` están **reservados**: los documentos aún
-no existen. Se redactarán copiando `FEATURE-000-template.md` cuando se aborde cada módulo,
-tomando como referencia de diseño el HTML correspondiente en `Plantillas/`.
+`FEATURE-004` (Familias) está **reservada**: el documento aún no existe. Se redactará copiando
+`FEATURE-000-template.md` cuando se aborde el módulo, tomando como referencia de diseño el HTML
+correspondiente en `Plantillas/`.
 
-Para esas features, la prioridad natural es: **convertir cada pantalla maqueta en lectura real**,
+Para esa feature, la prioridad natural es: **convertir la pantalla maqueta en lectura real**,
 empezando por los buscadores y la paginación, que hoy son controles sin comportamiento.
 
 ## Brechas
 
-- `FEATURE-003` y `FEATURE-004` no tienen documento: no hay
-  requisitos, criterios de aceptación ni flujo asociados hasta que se abran.
-- `Plantillas/` no tiene el HTML de referencia de SKUs ni de Insumos, que son las dos pantallas
-  más importantes (destino tras el login y única con datos). Hay que capturar esas referencias.
+- `FEATURE-004` no tiene documento: no hay requisitos, criterios de aceptación ni flujo asociados
+  hasta que se abra. Es la última pantalla que sigue en maqueta.
+- `Plantillas/` no tiene el HTML de referencia de SKUs, Insumos ni Familias. El usuario confirmó
+  (2026-10-02) que el sitio de Dentalia **cambió de estructura**, así que las referencias hay que
+  recapturarlas. En FEATURE-003 eso obligó a tomar la maqueta existente como fuente de verdad del
+  diseño, sin poder auditar las 7 cabeceras contra Dentalia.
 - Las features `DONE` no tienen cobertura automatizada: su evidencia son scripts de humo
   descartables, no tests versionados.
 - La regla "no implementar en `DRAFT` o `ANALYZED`" no está automatizada: depende de que cada

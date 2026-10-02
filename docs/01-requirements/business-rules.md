@@ -451,3 +451,42 @@ Definidas en [FEATURE-006](../features/FEATURE-006-usuarios.md). Resumen:
   referencia; se descarta `Costo`, que viene vacía en las 10 filas de la plantilla. `area`, `rol` y
   `superadmin` son **datos de pantalla**: nada en el servidor los lee para autorizar, así que
   `middleware.auth()` sigue siendo el único control de acceso.
+
+## BR-SKU · SKUs
+
+Definidas en [FEATURE-003](../features/FEATURE-003-skus.md). Resumen:
+
+- BR-SKU-001: los SKUs se leen de `dev."SKU"` en Supabase, solo lectura. Tabla y columnas con
+  **mayúsculas y espacios**: `id`, `Nombre`, `ID tratamiento`, `ID SKU`, `sesiones`, `Insumos`,
+  `Pasa por lab`, `Precio Nacional`, `Precio Turista`, comisiones, márgenes, `created_at`, etc.
+  De las 25 columnas **solo se declaran 4** en el modelo (`id`, `Nombre`, `ID tratamiento`,
+  `ID SKU`): las otras 21 no aparecen en la pantalla.
+  A su vez, **5 de las 7 columnas de la tabla son dato dummy declarado**: `Tipo` (constante
+  "Tratamiento"), `Estatus` (pill constante) y `Familia`, `Especialidad`, `Módulo de salud` (`—`).
+  No son derivables: ninguna columna de `dev."SKU"` corresponde a esos conceptos,
+  `public.familias` y `public.especialidades` tienen 0 filas y `SKU` no tiene ninguna FK hacia
+  `dev.modulos_salud`. Los valores viven en constantes del frontend (`TIPO_DUMMY`,
+  `ESTATUS_DUMMY`, `SIN_DATO_DUMMY`) para que la columna se vea completa sin reportar un dato
+  inventado como real. Si alguien los lee como datos, son falsos.
+- BR-SKU-002: paginación de 10, orden ascendente por `id`, y el filtro de ID de tratamiento usa
+  `"ID tratamiento"::text ILIKE`. El cast **no es cosmético**: PostgreSQL no castea `bigint` a
+  texto implícitamente y el `ILIKE` directo falla con
+  `operator does not exist: bigint ~~* unknown` (verificado el 2026-10-02). El cast habilita la
+  coincidencia parcial: `500` encuentra el `5004`.
+- BR-SKU-003: la fuente es **`dev`, no `public`**: el `searchPath` pone `dev` primero. `public."SKU"`
+  comparte los mismos 255 `id` pero **no es un duplicado exacto** (`EXCEPT` en ambos sentidos
+  devuelve 211 filas): difieren ~210 filas en las columnas de costo y margen. Ninguna de esas
+  columnas se muestra hoy, así que la diferencia no es visible, pero invertir el `searchPath`
+  dejaría de leer la tabla documentada.
+- BR-SKU-004: `"ID SKU"` es **texto** tipo `'2.3'`, no un número, y **no es único** (253 distintos
+  en 255 filas): el buscador por ID SKU devuelve varias filas y eso es correcto.
+- BR-SKU-005: la etiqueta "Ultima actualización 14/07 10:59" del pie es **dummy**, no viene de
+  `created_at` (que sí existe, rango 2025-09-18 a 2026-09-28). Decisión del usuario: se mantiene
+  como está por ahora.
+- BR-SKU-006: los 3 buscadores (`nombre`, `tratamiento`, `codigo`) filtran con `ILIKE` y `%`/`_`
+  escapados, son **combinables e independientes**, y el subtexto `Tratamiento {ID} · SKU {ID SKU}`
+  sale de `"ID tratamiento"` y `"ID SKU"`. `Nuevo SKU`, `Edición masiva`, `Ordenar` y la acción por
+  fila son **maqueta**: no hay ruta que escriba ni que abra detalle.
+- BR-SKU-007: **no existe plantilla HTML de SKUs** (el sitio de Dentalia cambió de estructura,
+  confirmado por el usuario el 2026-10-02). La maqueta ya construida es la referencia de diseño y
+  sus 7 cabeceras no se han podido auditar contra el sitio real.

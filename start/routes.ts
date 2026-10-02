@@ -25,7 +25,7 @@ router
 
 router
   .group(() => {
-    router.on('/skus').renderInertia('skus', {}).as('skus')
+    router.get('/skus', [controllers.Skus, 'index']).as('skus')
     router.on('/familias').renderInertia('familias', {}).as('familias')
     router.get('/insumos', [controllers.Insumos, 'index']).as('insumos')
     router.get('/kits', [controllers.Kits, 'index']).as('kits')

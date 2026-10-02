@@ -5,6 +5,12 @@ UI y rutas **replican** `Plantillas/<seccion>/Dentalia catalogo digital.html` (1
 versionados, incl. el dump de assets) — ese HTML es la fuente de verdad de diseño cuando
 hay que recrear o ajustar una pantalla.
 
+**Excepción conocida (2026-10-02)**: no existe `Plantillas/skus/` ni `Plantillas/familias/`, y
+`Plantillas/insumos/` tampoco. El usuario confirmó que **el sitio de Dentalia cambió de
+estructura**, así que esas referencias ya no existen que capturar. Para `/skus` la referencia
+de diseño quedó siendo la maqueta que ya estaba construida; si algún día aparece el HTML
+real, hay que revalidar columnas y buscadores.
+
 ## Comandos
 
 ```bash
@@ -146,6 +152,52 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
   descartó al seguir el HTML. El modal "Nuevo módulo de salud" y el botón trash son maqueta: **no
   hay ruta que escriba ni borre**.
 
+## Tabla SKU (`dev."SKU"`)
+
+- **255 filas**, `id` **disperso entre 8 y 287** (los 1-7 no existen), como `dev."Kits"`. Orden por
+  `id` asc, `perPage` 10 → **26 páginas**.
+- **25 columnas, en MAYÚSCULAS y con espacios** (por eso el SQL crudo las necesita entre comillas
+  dobles: `"Nombre"`, `"ID tratamiento"`, `"ID SKU"`). El modelo `app/models/sku.ts` declara
+  **solo 4** (`id`, `nombre`, `tratamiento`, `codigo`): las otras 21 no se muestran.
+- **`public."SKU"` NO es un duplicado exacto**: 255 filas con los mismos 255 `id`, pero `EXCEPT`
+  en ambos sentidos devuelve **211 filas** que difieren. La diferencia está **solo en costo y
+  margen**: los 4 `"Costo Nacional/Turista og/espcialista"` (210), `"Costo insumos"` (206), los 4
+  `"Margen *"` (206) y `"Costo laboratorio"` (1). Nombre, IDs, `created_at`, `sesiones`, `Insumos`,
+  `Pasa por lab`, comisiones y **precios son idénticos**. El `searchPath` pone `dev` primero y `dev`
+  es la fuente documentada.
+- **Trampa de tipos (importante)**: `"ID tratamiento"` es `bigint` y PostgreSQL **no** castea
+  `bigint` a texto de forma implícita, así que un `where('ID tratamiento', 'ilike', ...)` falla con
+  `operator does not exist: bigint ~~* unknown`. El filtro del controller usa
+  `whereRaw('"ID tratamiento"::text ILIKE ?', ...)`, que además habilita la coincidencia parcial
+  (`500` encuentra el `5004`).
+- **El mismo `bigint` en la salida**: `pg` devuelve los `bigint` como **texto**, así que `id` llega
+  como `"8"` aunque el modelo lo declare `number` y las props lo tipen `number`. Por eso el
+  controller castea `id: Number(sku.id)` (y `String(sku.tratamiento)`). Verificado el 2026-10-02
+  con humo HTTP: antes del casteo `typeof props.skus[0].id === 'string'`. No confíes en que la
+  declaración del modelo coincida con lo que llega al navegador.
+- `"ID SKU"` es **texto** tipo `'2.3'`, no un número, y **no es único** (253 distintos en 255
+  filas): el buscador por ID SKU puede devolver varias filas y eso es correcto.
+- **5 de las 7 columnas de la pantalla son DUMMY**, declaradas como constantes en
+  `inertia/pages/skus.tsx` (`TIPO_DUMMY`, `ESTATUS_DUMMY`, `SIN_DATO_DUMMY`): `Tipo` = "Tratamiento",
+  `Estatus` = pill "Activo", y `Familia`/`Especialidad`/`Módulo de salud` = `—`. **No son
+  derivables**: no hay columna que corresponda, `public.familias` y `public.especialidades` tienen
+  **0 filas** y `SKU` no tiene ninguna FK hacia módulos. Mismo patrón que `SKUS_DUMMY` de MSD.
+- El subtexto `Tratamiento {tratamiento} · SKU {codigo}` sale de `"ID tratamiento"` y `"ID SKU"`.
+- El pie conserva `Ultima actualización 14/07 10:59` como **dummy** (decisión del usuario), aunque
+  `created_at` existe (2025-09-18 a 2026-09-28).
+- `dev."SKU"` **no tiene ninguna FK** que entre ni salga. Las FKs del entorno apuntan a **`public`**:
+  `public."Insumos_SKU"` (1,904 filas, 150 SKUs con insumos) y `public.precios_comisiones` (496)
+  referencian `public."SKU"("ID tratamiento")`; `public.kit_sku` (1,179, 209 SKUs) trae
+  `id_tratamiento` **sin FK**. **No se consultan**: si algún día se quiere contar insumos o kits por
+  SKU, hay que unir contra `public`, no contra `dev`.
+- `created_at` es `NOT NULL DEFAULT now()`; `"Nombre"` e `"ID SKU"` admiten `NULL` pero ninguna de
+  las 255 filas lo trae. `sesiones` va de 1 a 6. `"Sesion se paga"` trae un `1111` absurdo.
+  `"Pasa por lab"` es texto sucio: `no` 127, `false` 71, `yes` 44, `NULL` 13.
+- Precios: solo **34 de 255 filas** con `"Precio Nacional"` ≠ 0 (rango 0-51,800), 17 `NULL`. Por eso
+  la pantalla **no muestra** información financiera (decisión del usuario).
+- `Nuevo SKU`, `Edición masiva`, `Ordenar` y la acción por fila (`externalLink`) son maqueta: **no
+  hay ruta que escriba ni ruta de detalle**.
+
 ## Tabla `users` (SQLite, no Supabase)
 
 - `/usuarios` es el único catálogo que **no** lee Supabase: lee `users` de la conexión `sqlite`
@@ -175,16 +227,24 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
 
 ## Rutas y auth
 
-- Páginas mock: `router.on('/x').renderInertia('x', {})`. Con datos:
+- Páginas mock: `router.on('/x').renderInertia('x', {})` (hoy solo `/familias`). Con datos:
+  `router.get('/skus', [controllers.Skus, 'index'])`,
   `router.get('/insumos', [controllers.Insumos, 'index'])`,
   `router.get('/kits', [controllers.Kits, 'index'])`,
-  `router.get('/zonas', [controllers.Zonas, 'index'])`,
+  `router.get('/zonas', [controllers.Zonas, 'index'])` o
   `router.get('/modulos-de-salud', [controllers.ModulosSalud, 'index'])` o
   `router.get('/usuarios', [controllers.Usuarios, 'index'])`.
 - Todo el admin está tras `middleware.auth()` (`start/routes.ts`); login es **magic link**
   (sin password). Para probar sin correo: en dev, si Mailtrap falla,
   `MagicLinkController` loguea `[MAGIC LINK DEV] <url>`; el token es de un solo uso y expira
   a los 30 min.
+- **Trampa de paginación (knex, no de la app)**: `paginate(page, perPage)` calcula
+  `offset = (page - 1) * perPage` y knex **lanza** con offset negativo o `NaN`
+  (`A non-negative integer must be provided to offset.`), o sea un **500 por URL escrita a
+  mano**: `?page=0`, `?page=-2` y `?page=` (vacío, porque `Number('') === 0`) revientan;
+  `?page=abc` deja un warning de knex y `?page=1.5` se comporta como offset 5. Hay que sanear:
+  `Number.isInteger(n) && n > 0 ? n : 1`. **Los 6 catálogos ya lo sanearon** (2026-10-02, junto con
+  FEATURE-003); no lo saltes al escribir uno nuevo.
 - Al tocar el sidebar se actualizan dos ramas: la sección activa
   (`inertia/layouts/admin.tsx`, `activeSection`) y la clase `active` del subitem.
 
@@ -227,8 +287,14 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
   aprobar.
 - La validación manual del usuario es obligatoria. Las verificaciones automáticas (lint,
   typecheck, codegen) son necesarias pero no sustituyen esa revisión.
-- Los 3 commits ya existentes (`2332e22`, `7bb5ecb`, `2dcd5e6`) quedan como están: el usuario
-  revisó y decidió conservarlos. No hay remoto configurado, así que nada se ha enviado a
-  ningún sitio.
+- Los commits existentes quedan como están: el usuario los revisó y decidió conservarlos. No hay
+  remoto configurado, así que nada se ha enviado a ningún sitio. Rama de trabajo `main`.
+- `Supplier of truth` **no aplica a la fase HTTP**: el usuario decidió (2026-10-02) no correr humo
+  salvo que lo pida, y en FEATURE-003 lo pidió una vez para probar el filtro (31 checks, en
+  `%TEMP%\opencode\verify-sku-filtro.mjs`, **no commiteado**). Para autenticar sin correo: insertar
+  un `magic_links` con `token_hash = sha256(token)` en `tmp/db.sqlite3` y consumir
+  `GET /auth/magic/:token`, que devuelve 302 y deja la cookie. Las props se leen del
+  `<script data-page="app" type="application/json">` del HTML servido; no hace falta navegador
+  (no hay SSR: el markup de la tabla lo monta React en el cliente).
 
 - **Documentación**: `docs/` es la fuente de verdad documental. Al cambiar cualquier comportamiento (rutas, auth, BD, lógica, UI, integración), actualiza obligatoriamente: el documento del módulo correspondiente en `docs/`, `docs/01-requirements/traceability.md` y el estado de ese documento. No implementar features en estado `DRAFT` o `ANALYZED` (ver `docs/features/README.md`).

@@ -1,7 +1,7 @@
 # FEATURE-006 · Usuarios
 
 ## Estado
-READY
+UAT
 
 ## Objetivo
 Convertir el catálogo de usuarios en una lectura real de la tabla `users` de SQLite (la misma que

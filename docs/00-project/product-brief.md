@@ -55,16 +55,16 @@ módulos de salud) pero no corresponde a ningún permiso: es un regrouping visua
 |---|---|---|---|
 | `AUT` | Autenticación por magic link | **Funcional** | SQLite |
 | `INS` | Catálogo de insumos | **Funcional** | Supabase `dev."Insumos"` |
-| `SKU` | SKUs | Maqueta (array en el `.tsx`) | Ninguno |
+| `SKU` | SKUs | FEATURE-003 `DONE` | Supabase `dev."SKU"` (255 filas) |
 | `FAM` | Familias | Maqueta | Ninguno |
-| `KIT` | Kits de insumos | FEATURE-005 `READY` | `dev."Kits"` (40 filas) |
-| `ZON` | Zonas | FEATURE-007 `READY` | `dev."zonas"` (2 filas) + `public.clinicas_zonas` |
-| `MSD` | Módulos de salud | FEATURE-008 `READY` | `dev.modulos_salud` (10 filas) |
-| `USR` | Usuarios | FEATURE-006 `READY` | SQLite `users` (1 fila) |
+| `KIT` | Kits de insumos | FEATURE-005 `DONE` | `dev."Kits"` (40 filas) |
+| `ZON` | Zonas | FEATURE-007 `DONE` | `dev."zonas"` (2 filas) + `public.clinicas_zonas` |
+| `MSD` | Módulos de salud | FEATURE-008 `DONE` | `dev.modulos_salud` (10 filas) |
+| `USR` | Usuarios | FEATURE-006 `UAT` | SQLite `users` (1 fila) |
 | `ADM` | Shell del panel (sidebar, layout, toasts) | Funcional | — |
 
-De las 9 secciones del sidebar, **6 de 8 páginas de dominio tienen datos** (`/insumos`, `/kits`,
-`/zonas`, `/modulos-de-salud` y `/usuarios`); solo `/skus` y `/familias` importan arrays hardcodeados
+De las 9 secciones del sidebar, **7 de 8 páginas de dominio tienen datos** (`/insumos`, `/skus`,
+`/kits`, `/zonas`, `/modulos-de-salud` y `/usuarios`); solo `/familias` importa un array hardcodeado
 dentro del propio archivo de la página.
 
 `/usuarios` rompe el patrón del resto del catálogo: no lee Supabase sino `users` de SQLite, que es
@@ -155,7 +155,7 @@ Los que el código permite afirmar, y los que nadie ha definido:
   una métrica de producto.
 - **No hay datos de volumen verificados**: ni usuarios, ni uso, ni frecuencia de consulta.
 - **No hay stakeholders identificados**: ver [stakeholders.md](stakeholders.md).
-- **El 7 de 8 páginas de dominio son maquetas**: el producto visible es, hoy, un buscador de
-  insumos; el resto del panel no tiene detrás nada.
+- **Solo 1 de las 8 páginas de dominio sigue en maqueta** (familias). En `/skus`, además, 5 de las 7
+  columnas muestran dato dummy: la pantalla se ve completa pero 4 celdas no tienen origen real.
 - **No existe PROD**: no hay forma de saber si el sistema está listo para operar, porque nunca se
   ha operado fuera de una máquina de desarrollo.

@@ -9,7 +9,7 @@
 | Última actualización | 2026-10-01 |
 | Versión relacionada | 2278659, 5b4f99b |
 
-El sistema tiene hoy seis módulos de dominio. Cada uno corresponde a un grupo de archivos real;
+El sistema tiene hoy siete módulos de dominio. Cada uno corresponde a un grupo de archivos real;
 las fronteras son observables en el código.
 
 ---
@@ -146,6 +146,54 @@ clínicas asignadas a cada zona.
 
 ---
 
+## SKUs (`SKU`)
+
+**Objetivo:** listar los SKUs del catálogo con paginación y tres buscadores (nombre, ID de
+tratamiento, ID de SKU).
+
+**Responsabilidades**
+- Leer `dev."SKU"` de Supabase en bloques de 10, ordenados por `id` ascendente (`id` disperso entre
+  8 y 287).
+- Filtrar por `"Nombre"`, `"ID tratamiento"` (con cast a texto, ver más abajo) y `"ID SKU"`, los tres
+  combinables e independientes (`app/controllers/skus_controller.ts`).
+- Presentar las **7 columnas de la maqueta** (`inertia/pages/skus.tsx`). Solo `Nombre` lleva dato
+  real, con el subtexto `Tratamiento {ID tratamiento} · SKU {ID SKU}`.
+- Mostrar como **dato dummy declarado** las 4 celdas sin origen: `Tipo` (`TIPO_DUMMY`),
+  `Estatus` (`ESTATUS_DUMMY`) y `Familia`, `Especialidad`, `Módulo de salud` (`SIN_DATO_DUMMY`).
+- Presentar la tabla, los 3 buscadores y la paginación real (26 páginas sobre 255 filas).
+
+**No es responsable de**
+- Escrituras: `Nuevo SKU`, `Edición masiva` y `Ordenar` son maqueta, no hay ruta que escriba.
+- Detalle: la acción por fila (`externalLink`) no abre nada porque no hay ruta de detalle.
+- La información financiera del SKU (precios, comisiones, márgenes), que existe en la tabla con 25
+  columnas y no se muestra.
+- El conteo de insumos y de kits por SKU, que se podría calcular con `public."Insumos_SKU"`
+  (1,904 filas) y `public.kit_sku` (1,179 filas).
+- "Última actualización": el texto del pie es dummy aunque `created_at` exista.
+
+**Detalle técnico**
+- El filtro de `"ID tratamiento"` **requiere cast**: `"ID tratamiento"` es `bigint` y PostgreSQL no
+  castea `bigint` a texto implícitamente, así que un `ILIKE` directo falla con
+  `operator does not exist: bigint ~~* unknown`. Con `"ID tratamiento"::text` se habilita la
+  coincidencia parcial (`500` encuentra el `5004`).
+- `"ID SKU"` es texto tipo `'2.3'` y **no es único** (253 distintos en 255 filas): un mismo
+  filtro puede devolver varias filas.
+- `public."SKU"` comparte los 255 `id` pero **no es duplicado exacto**: difieren ~210 filas en las
+  columnas de costo y margen. El `searchPath` pone `dev` primero y esa es la fuente documentada.
+
+**Dependencias**
+- Las mismas que el catálogo de insumos: conexión `supabase`, `withConnectionRetry()`.
+
+**Archivos**
+
+| Archivo | Rol |
+|---|---|
+| `app/models/sku.ts` | Modelo Lucid sobre `supabase."SKU"` (solo 4 de las 25 columnas) |
+| `app/controllers/skus_controller.ts` | Filtros `nombre`/`tratamiento`/`codigo`, paginación y render |
+| `inertia/pages/skus.tsx` | Tabla de 7 columnas, 3 buscadores, paginación, constantes dummy |
+
+---
+
 ## Módulos de salud (`MSD`)
 
 **Objetivo:** listar los módulos de salud del catálogo con paginación y búsqueda por nombre.
@@ -238,11 +286,11 @@ autenticarse con magic link.
 
 - **No existe módulo de autorización**: `roles-permissions`, policies y abilities están vacíos; el
   control de acceso es binario. Tener columnas `rol` y `superadmin` no cuenta como autorización.
-- **No existe módulo de catálogo para el resto del dominio**: SKU y familias viven como páginas que
-  importan arrays hardcodeados. Cada uno necesitará su módulo al pasar a datos reales.
-- Los catálogos de insumos, kits, zonas y módulos de salud comparten forma y conexión, pero están
-  duplicados como módulos independientes; no hay una abstracción común de catálogo. `/usuarios` se
-  suma a esa lista con una diferencia: lee otra conexión (SQLite) y comparte el modelo con la
-  autenticación.
+- **No existe módulo de catálogo para el resto del dominio**: familias vive como página que importa
+  un array hardcodeado y necesitará su módulo al pasar a datos reales. SKUs ya tiene el suyo.
+- Los catálogos de insumos, SKUs, kits, zonas y módulos de salud comparten forma y conexión, pero
+  están duplicados como módulos independientes; no hay una abstracción común de catálogo.
+  `/usuarios` se suma a esa lista con una diferencia: lee otra conexión (SQLite) y comparte el
+  modelo con la autenticación.
 - **No existe módulo de API**: `providers/api_provider.ts` y el registro de Tuyau están montados, pero ninguna ruta devuelve JSON.
 - Los límites entre módulos se apoyan en convención (rutas en `start/routes.ts`, alias `#models/*`, `#services/*`) y no en una capa de dominio o casos de uso.

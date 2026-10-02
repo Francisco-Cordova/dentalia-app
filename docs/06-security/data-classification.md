@@ -34,6 +34,13 @@ insumos de una clínica. No hay información de pacientes. La conexión a Supaba
 de solo lectura de la aplicación, pero el proyecto **no controla** quién más accede a ese proyecto
 de Supabase ni con qué permisos: eso es del equipo propietario.
 
+El mismo criterio se aplica al resto del catálogo de Supabase, incluido `dev."SKU"`: los nombres de
+los tratamientos y sus precios de lista son datos comerciales públicos. `/skus` solo lleva 4 columnas
+al navegador (`id`, `Nombre`, `ID tratamiento`, `ID SKU`), así que ni siquiera la información
+financiera de la tabla sale del servidor, pero **cualquiera con la credencial de Supabase puede
+leerla entera** (precios, comisiones, márgenes y costos), porque la conexión no se puede restringir
+por columna. Lo que la app no expone, la conexión sí.
+
 Precaución: el nombre del proyecto Supabase y su URL no deben documentarse en este repositorio
 por ser datos de conexión (van en `.env`).
 

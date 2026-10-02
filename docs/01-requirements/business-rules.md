@@ -432,3 +432,22 @@ Definidas en
 - BR-MSD-005: la tabla tiene 3 columnas (`Nombre`, `SKU`, `Opciones`) como la referencia de diseño;
   el botón trash va bajo "Opciones". `id_modulo` y `updated_at` no se muestran ni se declaran en el
   modelo.
+
+## BR-USR · Usuarios
+
+Definidas en [FEATURE-006](../features/FEATURE-006-usuarios.md). Resumen:
+
+- BR-USR-001: los usuarios se leen de `users` en **SQLite** (la conexión default), no de Supabase:
+  son las mismas cuentas que usa la magic link. Solo lectura.
+- BR-USR-002: `password` **nunca** se selecciona ni viaja al navegador, aunque la columna exista y
+  el login real sea por enlace mágico.
+- BR-USR-003: paginación de 10, orden ascendente por `id`.
+- BR-USR-004: el buscador único filtra por `full_name` **o** `email`, sin distinguir mayúsculas, con
+  `%`/`_` escapados. Cubre el correo porque el alta por magic link no pide nombre y `full_name`
+  suele venir en `NULL`. El escapado exige la cláusula `ESCAPE '\'` explícita: el `LIKE` de SQLite
+  no reconoce el backslash como carácter de escape (PostgreSQL sí), así que sin ella `escapeLike()`
+  sería un no-op.
+- BR-USR-005: la tabla tiene 5 columnas (`Nombre`, `Correo`, `Area`, `Rol`, `Superadmin`) como la
+  referencia; se descarta `Costo`, que viene vacía en las 10 filas de la plantilla. `area`, `rol` y
+  `superadmin` son **datos de pantalla**: nada en el servidor los lee para autorizar, así que
+  `middleware.auth()` sigue siendo el único control de acceso.

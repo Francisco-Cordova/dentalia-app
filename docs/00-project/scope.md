@@ -31,13 +31,14 @@
 
 ### Alcance de las páginas de dominio
 
-Las 8 páginas de dominio del panel existen y replican el diseño, pero **5 no tienen detrás una fuente
+Las 8 páginas de dominio del panel existen y replican el diseño, pero **2 no tienen detrás una fuente
 de datos**:
 
 | Página | Datos |
 |---|---|
 | `/insumos`, `/kits`, `/zonas`, `/modulos-de-salud` | **Reales** (Supabase, solo lectura) |
-| `/skus`, `/familias`, `/usuarios` | Arrays hardcodeados en el propio `.tsx` |
+| `/usuarios` | **Reales** (SQLite, `users`, la misma tabla de la autenticación) |
+| `/skus`, `/familias` | Arrays hardcodeados en el propio `.tsx` |
 
 Las que siguen con array hardcodeado están en alcance como **interfaz**. No lo están como
 funcionalidad: mover un slider, paginar o buscar en ellas no cambia nada porque no hay consulta.
@@ -53,7 +54,7 @@ funcionalidad: mover un slider, paginar o buscar en ellas no cambia nada porque 
 | # | Elemento | Motivo |
 |---|---|---|
 | 1 | Escritura, alta o edición de insumos | El catálogo es externo y de solo lectura (ADR-004). `migrations.paths: []` en la conexión `supabase` |
-| 2 | Gestión de usuarios (alta por admin, edición, baja, roles) | `/usuarios` es maqueta; el magic link **exige** usuario previo, no lo crea |
+| 2 | Gestión de usuarios (alta por admin, edición, baja, roles) | `/usuarios` solo **lista**; el magic link **exige** usuario previo y no lo crea, así que el alta sigue sin existir |
 | 3 | Autorización por rol o permiso | No existe el modelo. `middleware.auth()` es binario |
 | 4 | API REST / OpenAPI | Ninguna ruta devuelve JSON. `providers/api_provider.ts` y Tuyau están montados pero sin endpoints |
 | 5 | Recovery de contraseña y MFA | No existen. El magic link no es un recovery: requiere usuario registrado |
@@ -112,6 +113,7 @@ Supuestos que el código da por ciertos y que nadie ha validado:
 - [Product brief](product-brief.md)
 - [Módulos](../02-functional-design/modules.md)
 - [Catálogo de insumos](../features/FEATURE-001-catalogo-insumos.md)
+- [Usuarios](../features/FEATURE-006-usuarios.md)
 - [Autenticación magic link](../features/FEATURE-002-autenticacion-magic-link.md)
 - [ADR-004: catálogo de solo lectura](../03-architecture/adr/ADR-004-catalogo-solo-lectura.md)
 - [Entornos](../09-infrastructure/environments.md)
@@ -120,9 +122,9 @@ Supuestos que el código da por ciertos y que nadie ha validado:
 
 - **El alcance no está validado por negocio**: nadie ha dicho qué se espera del producto, así que
   la frontera entre "en alcance" y "fuera de alcance" es una inferencia del código.
-- **El alcance incluye 7 pantallas que no funcionan**: están en alcance como interfaz, pero eso
-  puede leerse como funcionalidad. Si el cliente espera ver SKU, familias, kits, zonas, módulos de
-  salud y usuarios con datos, el alcance real está incumplido.
+- **El alcance incluye pantallas sin datos reales**: 6 de las 8 páginas de dominio ya leen de una
+  fuente real, pero SKU y familias siguen en alcance como interfaz y eso puede leerse como
+  funcionalidad. Si el cliente espera ver SKU y familias con datos, el alcance real está incumplido.
 - **No hay alcance para las operaciones**: no se ha definido quién administerá el sistema, ni con
   qué procedimiento se incorporan usuarios.
 - **Los supuestos no están verificados**: en particular el #3 (existe una persona autorizada a crear

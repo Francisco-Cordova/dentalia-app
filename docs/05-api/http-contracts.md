@@ -31,7 +31,7 @@ Definidos en `app/middleware/inertia_middleware.ts`:
 | `flash.error` | `session.flashMessages.get('error')` | Llega como campo de nivel superior, no dentro de `props` |
 | `flash.success` | `session.flashMessages.get('success')` | Ídem |
 
-## `GET /insumos` — el único contrato con datos
+## `GET /insumos` — el contrato de catálogo de referencia
 
 ### Entrada (query string)
 
@@ -67,11 +67,37 @@ Los filtros se aplican **en conjunto** (AND). `escapeLike()` escapa `%` y `_`.
   formato de `paginate()`.
 - Los filtros vuelven como `null` cuando están vacíos (no como `""`).
 
+## `GET /usuarios` - listado de cuentas
+
+### Entrada (query string)
+
+| Param | Tipo | Comportamiento |
+|---|---|---|
+| `page` | número | Página de 10; fuera de rango devuelve la última página (no 404) |
+| `q` | texto | Un solo buscador: `full_name OR email` |
+
+### Salida (`inertia.render('usuarios', {...})`)
+
+| Prop | Tipo | Nota |
+|---|---|---|
+| `usuarios` | `array` | `id`, `nombre`, `correo`, `area`, `rol`, `superadmin`; **sin `password`** |
+| `total` | número | Total **filtrado** |
+| `page` / `lastPage` | número | Planos, igual que el resto de catálogos |
+| `q` | `string \| null` | Vuelve `null` si no hay término |
+
+- `superadmin` es `boolean` y la página lo muestra como Sí/No; `area` y `rol` son `string` y pueden
+  venir `null`, que la UI pinta como `—`.
+- El `select` nombra las columnas una a una. Es deliberado: `password` es `NOT NULL` en `users`, así
+  que un `SELECT *` filtraría el hash a la vista.
+- El filtro se arma con `whereRaw("full_name LIKE ? ESCAPE '\\'")`, no con `where(..., 'like')`:
+  SQLite necesita la cláusula `ESCAPE` explícita para que el backslash de `escapeLike()` funcione.
+- No hay ruta de escritura: POST, PUT, DELETE y PATCH sobre `/usuarios` devuelven 404.
+
 ## Contratos de las páginas mock
 
-Las 7 páginas restantes se sirven con `renderInertia('<nombre>', {})`: sin props de negocio. La
-UI muestra estructura fija. `inertia/pages/` contiene 12 páginas (8 del panel, 2 de auth, 2 de
-error).
+Las páginas que siguen mock (`/skus`, `/familias`, `/home`) se sirven con
+`renderInertia('<nombre>', {})`: sin props de negocio. La UI muestra estructura fija.
+`inertia/pages/` contiene 12 páginas (8 del panel, 2 de auth, 2 de error).
 
 ## Códigos de estado observados (verificado por HTTP)
 
@@ -104,6 +130,7 @@ error).
 ## Referencias
 - [Vista general de la API](api-overview.md)
 - [Flujo de Insumos](../02-functional-design/flows/FLOW-INS-001.md)
+- [Flujo de Usuarios](../02-functional-design/flows/FLOW-USR-001.md)
 - [Flujo de autenticación](../02-functional-design/flows/FLOW-AUT-001.md)
 - `inertia/pages/insumos.tsx`, `app/controllers/insumos_controller.ts`
 
@@ -120,3 +147,10 @@ error).
   contrato de error compartido ni códigos de negocio.
 - **Los errores 500 en DEV filtran detalle interno** (p. ej. el mensaje del driver de PostgreSQL)
   porque `handler.ts:10` usa `debug = !app.inProduction`.
+- **El buscador de `/usuarios` depende de que SQLite compare sin distinguir mayúsculas**: `LIKE` de
+  SQLite solo es case-insensitive para ASCII, así que un término con acentos o `ñ` no coincide como
+  en PostgreSQL. Con la convención actual de correos y nombres en ASCII no se nota.
+- **`ESCAPE '\'` es obligatorio en el filtro de `/usuarios`**: es la diferencia entre un buscador que
+  escapa `%`/`_` y uno donde esos caracteres siguen siendo comodines. Se midió el 2026-10-01 con
+  `better-sqlite3`: sin la cláusula, el patrón `%\%` busca la cadena `a\Xb` y no encuentra ni un
+  `%` literal ni `a%b`.

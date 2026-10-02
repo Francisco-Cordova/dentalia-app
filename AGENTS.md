@@ -44,8 +44,8 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
 
 | conexión | driver | uso | notas |
 |---|---|---|---|
-| `sqlite` (default) | better-sqlite3 | auth: `users`, `magic_links` | archivo `tmp/db.sqlite3` |
-| `supabase` | pg | catálogo (`Insumos`, `Kits`, y futuras tablas) | solo lectura, `searchPath: ['dev','public']` |
+| `sqlite` (default) | better-sqlite3 | auth: `users`, `magic_links`; y el catálogo de `/usuarios` | archivo `tmp/db.sqlite3` |
+| `supabase` | pg | catálogo (`Insumos`, `Kits`, `zonas`, `modulos_salud`) | solo lectura, `searchPath: ['dev','public']` |
 
 - `supabase` es **secondary y read-only**: `migrations.paths: []`. Nunca
   `node ace migration:run --connection=supabase`; las tablas ya existen en Supabase.
@@ -61,7 +61,8 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
   `withConnectionRetry()` de `app/services/with_connection_retry.ts` (import `#services/...`);
   reintenta una vez. Medido el 2026-09-30: el pool de `pg` ya descarta el cliente muerto y
   entrega otro, así que el reintento casi nunca llega a ejecutarse. Es una red de seguridad
-  para cuando el error escapa al pool, no lo que evita el fallo.
+  para cuando el error escapa al pool, no lo que evita el fallo. **No aplica a `sqlite`**:
+  `/usuarios` consulta la conexión local y no lo usa.
 
 ## Tabla Insumos (nombre real con mayúscula)
 
@@ -145,13 +146,41 @@ node ace test            # Japa: suites unit/functional/browser (ver abajo)
   descartó al seguir el HTML. El modal "Nuevo módulo de salud" y el botón trash son maqueta: **no
   hay ruta que escriba ni borre**.
 
+## Tabla `users` (SQLite, no Supabase)
+
+- `/usuarios` es el único catálogo que **no** lee Supabase: lee `users` de la conexión `sqlite`
+  default, la misma tabla de la autenticación. Por eso no usa `withConnectionRetry()`.
+- 3 columnas de pantalla (`area`, `rol`, `superadmin`) las añade la migración
+  `1780000000000_add_area_rol_superadmin_to_users_table`. **Son informativas**: nada las lee para
+  autorizar; el único control sigue siendo `middleware.auth()`.
+- `password` es `NOT NULL` (hash scrypt) aunque el login real sea por magic link. El controller
+  **selecciona columnas una a una** y jamás pide `SELECT *`, para que el hash no llegue al
+  navegador. Mantener esa costumbre al añadir campos.
+- Buscador único `q`: `full_name` **o** `email` con `LIKE` de SQLite (case-insensitive solo para
+  ASCII), escapando `%`/`_`. El `OR` con `email` es a propósito: el alta por magic link no pide
+  nombre y `full_name` suele venir `NULL`.
+- **Trampa de SQLite: el `LIKE` de SQLite NO acepta backslash como escape** (PostgreSQL sí). Sin la
+  cláusula `ESCAPE '\'` explícita, `escapeLike()` no escapa nada: `\%` exige un backslash literal y
+  `%` sigue siendo comodín, así que el término no encuentra ni las filas que contienen un `%`.
+  Por eso el controller usa `whereRaw("full_name LIKE ? ESCAPE '\\'", [term])` y no
+  `where(..., 'like', term)`. Medido el 2026-10-01 con `better-sqlite3`: sin `ESCAPE`, buscar `%` no
+  encontraba una fila que contenía `50% descuento`; con `ESCAPE`, sí.
+- Orden por `id` asc, `perPage` 10. La tabla muestra 5 columnas (`Nombre`, `Correo`, `Area`, `Rol`,
+  `Superadmin`): se descarta `Costo` porque en la plantilla de referencia viene vacía.
+- Modal "Nuevo usuario" y menú `···`: **maqueta, no hay ruta que escriba**. Nadie puede dar de alta
+  una cuenta desde la app, que es el bloqueo de negocio más urgente del proyecto.
+- Contenido verificado el 2026-10-01: **1 fila** (`id 1`). Se borraron 17 usuarios de prueba que
+  dejaron scripts de humo (`verify-*`, `dbg-*`, `smoke@*`); `tmp/db.sqlite3` está gitignored, así
+  que hay que repetir la limpieza en otra máquina.
+
 ## Rutas y auth
 
 - Páginas mock: `router.on('/x').renderInertia('x', {})`. Con datos:
   `router.get('/insumos', [controllers.Insumos, 'index'])`,
   `router.get('/kits', [controllers.Kits, 'index'])`,
-  `router.get('/zonas', [controllers.Zonas, 'index'])` o
-  `router.get('/modulos-de-salud', [controllers.ModulosSalud, 'index'])`.
+  `router.get('/zonas', [controllers.Zonas, 'index'])`,
+  `router.get('/modulos-de-salud', [controllers.ModulosSalud, 'index'])` o
+  `router.get('/usuarios', [controllers.Usuarios, 'index'])`.
 - Todo el admin está tras `middleware.auth()` (`start/routes.ts`); login es **magic link**
   (sin password). Para probar sin correo: en dev, si Mailtrap falla,
   `MagicLinkController` loguea `[MAGIC LINK DEV] <url>`; el token es de un solo uso y expira

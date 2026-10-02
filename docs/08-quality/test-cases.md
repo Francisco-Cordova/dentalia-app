@@ -56,6 +56,32 @@ en DEV y lo anotó aquí; no hay forma de volver a comprobarlo.
 | TC-INS-008 | Sesión válida | `/insumos` tras 2 min de inactividad | `withConnectionRetry()` reconecta y no hay "connection terminated unexpectedly" | Ejecutado |
 | TC-INS-009 | `SUPABASE_DB_URL` sin `:PASSWORD` | Arrancar el servidor | Falla al arrancar con el error de SCRAM | Ejecutado |
 
+## Casos del catálogo de usuarios (FEATURE-006)
+
+| ID | Precondición | Acción | Resultado esperado | Estado |
+|---|---|---|---|---|
+| TC-USR-001 | Sesión válida, `users` con la fila `id 1` | `GET /usuarios` | 200 con `total: 1`, `page: 1`, `lastPage: 1`, `q: null` y `area: 'TO'`, `rol: 'Superadmin'`, `superadmin: true` | Pendiente |
+| TC-USR-002 | Sesión válida | `GET /usuarios` e inspeccionar las props | **No** aparece `password` en ninguna fila: el `select` nombra columnas y omite el hash | Pendiente |
+| TC-USR-003 | `users` con varias filas | `GET /usuarios?q=correo` | Filtra por `email`; `total` refleja el filtro | Pendiente |
+| TC-USR-004 | `users` con varias filas | `GET /usuarios?q=nombre` | Filtra por `full_name` con el mismo parámetro | Pendiente |
+| TC-USR-005 | `users` con una fila que contenga un `%` literal | `GET /usuarios?q=%` | Escapa el `%` con `escapeLike()` **y la cláusula `ESCAPE '\'`**: devuelve esa fila, no el catálogo entero | Pendiente |
+| TC-USR-006 | `users` con `full_name` en `NULL` | `GET /usuarios?q=<correo>` | Aparece en el resultado: `email` cubre el alta por magic link, que no pide nombre | Pendiente |
+| TC-USR-007 | Sesión válida, buscador | Escribir un término y pulsar Enter | El `onKeyDown` dispara la búsqueda: no depende del submit implícito | Pendiente |
+| TC-USR-008 | Sesión válida | `GET /usuarios?page=999` | Página vacía, sin error | Pendiente |
+| TC-USR-009 | Sin sesión | `GET /usuarios` | 302 a `/`: se aplica `middleware.auth()` | Pendiente |
+| TC-USR-010 | Sesión válida | `POST /usuarios` | 404: `router.get()` solo registra GET; el modal "Nuevo usuario" es maqueta | Pendiente |
+| TC-USR-011 | `users.superadmin = false` | `GET /usuarios` | La columna muestra `No`, no una casilla ni un badge | Pendiente |
+
+Los 11 quedaron **sin ejecutar**: la revisión fue manual en el navegador y por indicación del
+usuario no se corrió el humo HTTP. El script correspondiente está fuera del repositorio, así que
+no queda evidencia reproducible (ver Brechas).
+
+Lo que **sí** se comprobó por código, sin pasar por HTTP, fue la semántica del filtro: con
+`better-sqlite3` en memoria se verificó que `LIKE` sin `ESCAPE` no escapa el backslash y que
+`LIKE ... ESCAPE '\'` sí, y que knex genera
+`where (full_name LIKE ? ESCAPE '\' or email LIKE ? ESCAPE '\')`. Eso cierra la causa de TC-USR-005,
+no el caso completo.
+
 ## Casos de seguridad transversal
 
 | ID | Precondición | Pasos | Resultado esperado | Estado |
@@ -80,8 +106,8 @@ en DEV y lo anotó aquí; no hay forma de volver a comprobarlo.
   memoria de quien los hizo.
 - **No hay evidencia persistente**: la columna "Evidencia" está vacía en todos los casos; un smoke
   manual no deja registro reproducible.
-- **Casos sin ejecutar** (TC-AUT-012) y sin descubrir: la tabla documenta lo que se probó, no la
-  cobertura completa.
+- **Casos sin ejecutar** (TC-AUT-012, TC-USR-001…011) y sin descubrir: la tabla documenta lo que se
+  probó, no la cobertura completa. Los de usuarios están escritos pero pendientes a propósito.
 - **Sin casos negativos de UI**: no hay prueba de mensajes de error visibles al usuario (por
   ejemplo, los errores de validación del formulario de login).
 - **Sin casos de regresión asociados a incidentes**: no hay forma de saber qué casos existían

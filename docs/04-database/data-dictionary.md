@@ -18,20 +18,32 @@ el del catálogo se administra fuera del repositorio.
 
 ## `users`
 
-Persona con sesión. La crea el seeder de pruebas o `POST /signup`.
+Persona con sesión. La crea el seeder de pruebas o `POST /signup`. Es también la fuente del
+catálogo de `/usuarios`, que se lee de esta misma tabla.
 
 | Columna | Tipo SQLite | Nulo | Clave | Origen | Descripción |
 |---|---|---|---|---|---|
 | `id` | `integer` autoincrement | no | PK | Lucid | Identificador |
-| `full_name` | `varchar(255)` | **sí** | — | Formulario | Nombre mostrado en el sidebar; si es null, la UI usa el correo |
-| `email` | `varchar(254)` | no | **UNIQUE** (`users_email_unique`) | Formulario | Identificador de acceso; límite de 254 por RFC 5321 |
-| `password` | `varchar(255)` | no | — | Mixin `withAuthFinder(hash)` | Hash scrypt. **Obligatorio** aunque el login real sea por magic link |
-| `created_at` | `datetime` | no | — | Lucid | Alta |
-| `updated_at` | `datetime` | sí | — | Lucid | Última modificación |
+| `full_name` | `varchar(255)` | **sí** | - | Formulario | Nombre mostrado en el sidebar y en la columna "Nombre"; si es null, la UI usa el correo |
+| `email` | `varchar(254)` | no | **UNIQUE** (`users_email_unique`) | Formulario | Identificador de acceso; límite de 254 por RFC 5321. Columna "Correo" del catálogo |
+| `password` | `varchar(255)` | no | - | Mixin `withAuthFinder(hash)` | Hash scrypt. **Obligatorio** aunque el login real sea por magic link. **Nunca se expone en `/usuarios`** |
+| `area` | `varchar(255)` | **sí** | - | **Migración 2026-10-01** | Columna "Area" del catálogo. Dato de pantalla, no autoriza nada |
+| `rol` | `varchar(255)` | **sí** | - | **Migración 2026-10-01** | Columna "Rol". Texto libre porque la referencia trae valores compuestos (`"Validador, Editar"`). Dato de pantalla |
+| `superadmin` | `boolean` | no | - | **Migración 2026-10-01**, default `false` | Columna "Superadmin" (Sí/No). En la referencia es una columna separada del rol. Dato de pantalla |
+| `created_at` | `datetime` | no | - | Lucid | Alta |
+| `updated_at` | `datetime` | **sí** | - | Lucid | Última modificación |
 
-- `initials` (`app/models/user.ts:7-13`) no es columna: ACCESSOR que toma la primera letra de nombre
+- `initials` (`app/models/user.ts`) no es columna: ACCESSOR que toma la primera letra de nombre
   y apellido, o las dos primeras del correo.
 - Relación: `magic_links.user_id → users.id`.
+- **Última actualización**: 2026-10-01. `area`, `rol` y `superadmin` las añade la migración
+  `1780000000000_add_area_rol_superadmin_to_users_table`, porque sin ellas el catálogo no podía
+  mostrar las columnas de la referencia de diseño. Ninguna de las tres participa en una decisión de
+  autorización: `middleware.auth()` sigue siendo el único control.
+- Contenido verificado el 2026-10-01: **1 fila** (`id 1`, `area = 'TO'`, `rol = 'Superadmin'`,
+  `superadmin = 1`). Se borraron 17 usuarios de prueba que habían dejado scripts de humo
+  (`verify-*`, `dbg-*`, `smoke@*`). Ese archivo es local y gitignored, así que la limpieza hay que
+  repetirla en cualquier otro entorno.
 
 ## `magic_links`
 

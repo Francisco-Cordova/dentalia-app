@@ -43,7 +43,7 @@ una verificación por HTTP) o, si no se cumple, en la sección de Brechas.
 | SEC-025 | El catálogo no se modifica desde la aplicación | **Cumple** | `migrations.paths: []`; solo `SELECT` |
 | SEC-026 | Las entradas de BD parametrizadas (sin concatenar SQL) | **Cumple** | Lucid/Knex parametrizan; los `ORDER BY` son columnas fijas del código |
 | SEC-027 | Hay rate limiting en las operaciones sensibles | **No cumple** | Sin `config/rate_limiter.ts` ni throttle |
-| SEC-028 | Hay control de acceso por rol | **No cumple** | No hay RBAC: `users` no tiene campo de rol ni permisos |
+| SEC-028 | Hay control de acceso por rol | **No cumple** | No hay RBAC: `users.rol` y `users.superadmin` existen pero ningún código los lee |
 | SEC-029 | Hay segundo factor de autenticación | **No cumple** | — |
 | SEC-030 | Hay registro de auditoría de accesos | **No cumple** | Sin tabla de auditoría ni logs de seguridad propios |
 | SEC-031 | Los errores en producción no filtran detalle interno | **Cumple** | `debug = !app.inProduction`; páginas de error propias |

@@ -23,6 +23,9 @@ erDiagram
         varchar full_name "nullable"
         varchar email UK "not null, 254"
         varchar password "not null, hash scrypt"
+        varchar area "nullable, dato de pantalla"
+        varchar rol "nullable, dato de pantalla"
+        boolean superadmin "not null, default false, dato de pantalla"
         datetime created_at "not null"
         datetime updated_at "nullable"
     }
@@ -45,6 +48,14 @@ Leyenda: `PK` clave primaria, `FK` clave foránea, `UK` único.
   no tiene enlaces hasta que pide uno.
 - Un `MAGIC_LINKS` pertenece a 0..1 `USERS` porque la columna es nullable en el esquema (aunque la
   aplicación siempre la escribe).
+
+### `USERS` también es el catálogo de `/usuarios`
+`USERS` cumple dos papeles: es la tabla de autenticación **y** la fuente del catálogo de usuarios.
+Por eso `/usuarios` lee esta conexión y no Supabase, y no usa `withConnectionRetry()`.
+
+`area`, `rol` y `superadmin` (añadidas el 2026-10-01) existen para poder mostrar las columnas de la
+referencia de diseño. **No son entidades de autorización**: no hay `ROLES`, ni `PERMISSIONS`, ni
+tabla puente, y nada las lee para decidir un acceso.
 
 ## Base de datos de catálogo (Supabase, solo lectura)
 

@@ -28,7 +28,7 @@ y listar **qué hace falta saber** para poder especificarlas.
 | `SKU` | SKUs | `/skus` | Maqueta | RF-SKU-001 *reservado* | FEATURE-003 `DRAFT` |
 | `FAM` | Familias | `/familias` | Maqueta | RF-FAM-001 *reservado* | FEATURE-004 `DRAFT` |
 | `KIT` | Kits de insumos | `/kits` | Real | RF-KIT-001…006 | FEATURE-005 `READY` |
-| `USR` | Usuarios | `/usuarios` | Maqueta | RF-USR-001 *reservado* | FEATURE-006 `DRAFT` |
+| `USR` | Usuarios | `/usuarios` | Real | RF-USR-001…003 | FEATURE-006 `READY` |
 | `ZON` | Zonas | `/zonas` | Real | RF-ZON-001…003 | FEATURE-007 `READY` |
 | `MSD` | Módulos de salud | `/modulos-de-salud` | Real | RF-MSD-001…003 | FEATURE-008 `READY` |
 
@@ -36,11 +36,11 @@ y listar **qué hace falta saber** para poder especificarlas.
 
 | Motivo | Evidencia |
 |---|---|
-| Las páginas importan arrays literales desde el propio `.tsx` | `inertia/pages/skus.tsx`, `familias.tsx`, `usuarios.tsx` |
+| Las páginas importan arrays literales desde el propio `.tsx` | `inertia/pages/skus.tsx`, `familias.tsx` |
 | No hay modelo Lucid para ninguno | `app/models/` tiene `user.ts`, `magic_link.ts`, `insumo.ts`, `kit.ts`, `zona.ts`, `modulos_salud.ts` |
-| No hay migración que cree sus tablas | `database/migrations/` solo tiene `users` y `magic_links` |
-| No hay controller | `app/controllers/` tiene `insumos`, `kits`, `zonas`, `modulos_salud`, `magic_link`, `new_account`, `session` |
-| Los buscadores y la paginación son controles sin comportamiento | Solo `/insumos`, `/kits`, `/zonas` y `/modulos-de-salud` conectan su `onKeyDown` y su paginación |
+| No hay migración que cree sus tablas | `database/migrations/` tiene `users`, `magic_links` y el añadido de `area`/`rol`/`superadmin` |
+| No hay controller | `app/controllers/` tiene `insumos`, `kits`, `zonas`, `modulos_salud`, `usuarios`, `magic_link`, `new_account`, `session` |
+| Los buscadores y la paginación son controles sin comportamiento | Solo `/insumos`, `/kits`, `/zonas`, `/modulos-de-salud` y `/usuarios` conectan su `onKeyDown` y su paginación |
 | No hay reglas de negocio conocidas | No existe un documento de negocio en el repositorio |
 
 ## Qué hay que saber para especificar cada módulo
@@ -82,13 +82,20 @@ tabla relaciona cada kit con sus insumos y en qué cantidad.
 
 ### `USR` · FEATURE-006
 
-| # | Pregunta |
-|---|---|
-| 1 | **¿Quién da de alta a los usuarios?** Hoy el magic link exige un `User` previo y no hay interfaz de gestión. Es la pregunta más urgente del proyecto |
-| 2 | ¿La lista es de usuarios de la clínica o de contactos comerciales? |
-| 3 | ¿Un usuario puede tener rol? Hoy no hay columna de rol |
-| 4 | ¿Se puede dar de baja a alguien? Sin proceso de baja, las cuentas se acumulan |
-| 5 | ¿Quién ve esta pantalla: todos los autenticados? Con el control binario actual, sí |
+La lectura del catálogo ya no está bloqueada: los usuarios son las filas de `users` (SQLite, la misma
+tabla de la autenticación) y [FEATURE-006](../features/FEATURE-006-usuarios.md) cubre el listado.
+Las preguntas quedan así:
+
+| # | Pregunta | Estado |
+|---|---|---|
+| 1 | ¿Quién da de alta a los usuarios? | **Abierta.** El magic link exige un `User` previo y no hay interfaz de gestión: el modal "Nuevo usuario" sigue siendo maqueta. Es la pregunta más urgente del proyecto |
+| 2 | ¿La lista es de usuarios de la clínica o de contactos comerciales? | **Abierta.** Hoy solo se lee `users`, que es la tabla de autenticación |
+| 3 | ¿Un usuario puede tener rol? | **Parcialmente respondida.** `users` ya tiene `rol` (texto) y `superadmin` (booleano), pero los añadió la migración para poder mostrar la referencia de diseño, y **nada en el servidor los lee para autorizar**. La matriz de permisos sigue sin existir |
+| 4 | ¿Se puede dar de baja a alguien? | **Abierta.** Sin proceso de baja, las cuentas se acumulan: hoy se ven 18 filas en `users` porque los scripts de humo dejaron usuarios de prueba |
+| 5 | ¿Quién ve esta pantalla: todos los autenticados? | **Sí, de hecho.** Con el control binario actual todos los autenticados la ven, y el listado expone el correo de todos |
+
+Lo que sigue pendiente para `USR` es la **escritura**: quién crea cuentas, quién las edita y quién las
+desactiva.
 
 ### `ZON` · FEATURE-007
 
@@ -153,9 +160,10 @@ Mientras tanto, la regla de `features/README.md` sigue aplicando: **no implement
 
 ## Brechas
 
-- **Tres de ocho módulos de dominio sin requisito** (`SKU`, `FAM`, `USR`): la brecha
-  está declarada y con su causa identificada, no cerrada de hecho. `KIT`, `ZON` y `MSD` dejaron de
-  estar aquí: tienen tabla, requisitos y lectura real, aunque su escritura sigue sin decidir.
+- **Dos de ocho módulos de dominio sin requisito** (`SKU`, `FAM`): la brecha
+  está declarada y con su causa identificada, no cerrada de hecho. `KIT`, `ZON`, `MSD` y `USR`
+  dejaron de estar aquí: tienen tabla, requisitos y lectura real, aunque su escritura sigue sin
+  decidir.
 - **La pregunta sobre quién da de alta usuarios está sin respuesta desde el primer día**: sin ella,
   el producto no es utilizable por nadie ajeno a quien mantiene la base de datos.
 - **No hay documento de negocio**: todas las preguntas de este documento llevan a la misma raíz, que

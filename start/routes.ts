@@ -29,7 +29,7 @@ router
     router.on('/familias').renderInertia('familias', {}).as('familias')
     router.get('/insumos', [controllers.Insumos, 'index']).as('insumos')
     router.get('/kits', [controllers.Kits, 'index']).as('kits')
-    router.on('/usuarios').renderInertia('usuarios', {}).as('usuarios')
+    router.get('/usuarios', [controllers.Usuarios, 'index']).as('usuarios')
     router.get('/zonas', [controllers.Zonas, 'index']).as('zonas')
     router.get('/modulos-de-salud', [controllers.ModulosSalud, 'index']).as('modulosDeSalud')
     router.on('/home').renderInertia('home', {}).as('home')

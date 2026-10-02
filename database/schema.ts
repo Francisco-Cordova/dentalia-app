@@ -35,8 +35,20 @@ export class MagicLinkSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['createdAt', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
+  static $columns = [
+    'area',
+    'createdAt',
+    'email',
+    'fullName',
+    'id',
+    'password',
+    'rol',
+    'superadmin',
+    'updatedAt',
+  ] as const
   $columns = UserSchema.$columns
+  @column()
+  declare area: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()
@@ -47,6 +59,10 @@ export class UserSchema extends BaseModel {
   declare id: number
   @column({ serializeAs: null })
   declare password: string
+  @column()
+  declare rol: string | null
+  @column()
+  declare superadmin: boolean
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }

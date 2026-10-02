@@ -9,9 +9,14 @@
 | Última actualización | 2026-09-30 |
 | Versión relacionada | 2278659, 5b4f99b |
 
-El sistema **no implementa RBAC**: no hay columna de rol, ni policies, ni abilities, ni tabla de
-permisos. El único control es binario: ¿hay sesión o no la hay? Las filas siguientes describen los
-dos estados reales del código, no roles de negocio.
+El sistema **no implementa RBAC**: no hay policies, ni abilities, ni tabla de permisos, ni ningún
+código que lea un rol para decidir un acceso. El único control es binario: ¿hay sesión o no la hay?
+Las filas siguientes describen los dos estados reales del código, no roles de negocio.
+
+`users` tiene columnas `area`, `rol` y `superadmin` desde la migración
+`1780000000000_add_area_rol_superadmin_to_users_table`, pero son **datos de pantalla**: existen para
+que el catálogo de `/usuarios` pueda mostrar las columnas de la referencia, y nada las consulta para
+autorizar. Que haya una columna `rol` no significa que haya un sistema de roles.
 
 | Rol | Objetivo | Alcance de datos | Observaciones |
 |---|---|---|---|
@@ -51,8 +56,9 @@ dos estados reales del código, no roles de negocio.
 - **No hay separación de responsabilidades**: quien puede ver el catálogo puede ver también
   `/usuarios`, `/zonas` y `/modulos-de-salud`, porque las tres rutas comparten el mismo grupo con
   `middleware.auth()` y no aplican ningún filtro adicional.
-- **No hay gestión de roles**: `inertia/pages/usuarios.tsx` es una maqueta y `users` no tiene
-  columna de rol.
+- **No hay gestión de roles**: `inertia/pages/usuarios.tsx` ya lee `users` de verdad y muestra las
+  columnas `Rol` y `Superadmin`, pero ambas son informativas. No hay ruta que las escriba, y el
+  menú de editar/eliminar del catálogo es maqueta.
 - **`/signup` es una puerta de entrada no deseada**: cualquier persona con un correo puede obtener
   una sesión con permisos de `Administrador`. Requiere verificación de correo o cierre de la ruta.
 - **No hay auditoría de accesos**: no se registra quién consultó el catálogo ni qué usuario inició

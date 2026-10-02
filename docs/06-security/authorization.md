@@ -30,8 +30,10 @@ Cualquier persona autenticada puede ver **todas** las pantallas, incluidas las d
 (`/usuarios`, `/zonas`, `/modulos-de-salud`). No hay separación entre "administrador" y "consulta",
 aunque la taxonomía del panel sugiera esa distinción (sección "Admin" del sidebar).
 
-`users` no tiene columna de rol, tipo ni nivel de privilegio. La pantalla `/usuarios` es una maqueta
-vacía, así que no se puede gestionar quién accede a qué.
+`users` tiene columnas `area`, `rol` y `superadmin`, pero **no se leen para autorizar nada**: son
+datos que el catálogo de `/usuarios` muestra porque la referencia de diseño los trae. `superadmin`
+en `true` no abre ni cierra ninguna puerta, y `rol` no filtra ninguna consulta. Tampoco existe forma
+de gestionar quién accede a qué: no hay ruta que escriba esas columnas.
 
 ## Modelo de datos
 
@@ -40,7 +42,9 @@ users ─┬─ magic_links
        └─ (nada más)
 ```
 
-Sin `roles`, `permissions`, `user_roles`, ni ninguna tabla de relación.
+Sin `roles`, `permissions`, `user_roles`, ni ninguna tabla de relación. Las columnas `area`, `rol` y
+`superadmin` viven **dentro** de `users` en lugar de en tablas propias, lo que refuerza que son
+atributos informativos y no un modelo de permisos.
 
 ## Principios que aplica el código
 
@@ -59,6 +63,10 @@ Sin `roles`, `permissions`, `user_roles`, ni ninguna tabla de relación.
 
 - **SEC-028 incumplido**: no hay RBAC. Cualquier sesión accede a todo el panel.
 - **No hay matriz de permisos** que revisar ni mantener: cuando se añada, no hay punto de partida.
+- **Tener columnas `rol` y `superadmin` es peor que no tenerlas**: parecen un control de acceso y
+  no lo son. Quien lea el modelo puede concluir que existe un superusuario privileged, y no lo hay.
+  Si algún día se implementa RBAC de verdad, habrá que decidir qué hacer con esos datos: migrarlos a
+  tablas de roles o dejarlos como informativo sin usar.
 - **La ausencia de roles no está justificada en ningún documento**: si el producto solo tiene un
   tipo de usuario, debería escribirse explícitamente para que la ausencia sea una decisión y no un
   olvido.

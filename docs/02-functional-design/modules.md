@@ -9,7 +9,7 @@
 | Última actualización | 2026-10-01 |
 | Versión relacionada | 2278659, 5b4f99b |
 
-El sistema tiene hoy cuatro módulos de dominio. Cada uno corresponde a un grupo de archivos real;
+El sistema tiene hoy seis módulos de dominio. Cada uno corresponde a un grupo de archivos real;
 las fronteras son observables en el código.
 
 ---
@@ -26,7 +26,8 @@ las fronteras son observables en el código.
 
 **No es responsable de**
 - Autorización por rol o permiso: **no existe**. Solo distingue autenticado de no autenticado.
-- Gestión de usuarios (alta, edición, baja) — la pantalla `/usuarios` es maqueta.
+- Gestión de usuarios (alta, edición, baja) — la pantalla `/usuarios` solo **lista** las cuentas que
+  ya pueden entrar.
 - Recuperación de contraseña o MFA: no existen.
 
 **Dependencias**
@@ -62,7 +63,7 @@ las fronteras son observables en el código.
 
 **No es responsable de**
 - Escrituras, altas o ediciones de insumos: el catálogo es externo y de solo lectura.
-- SKU, familias, módulos de salud y usuarios: son pantallas maqueta sin conexión a datos.
+- SKU y familias: son pantallas maqueta sin conexión a datos.
 - Caché del catálogo: cada visita a `/insumos` vuelve a Supabase.
 
 **Dependencias**
@@ -175,6 +176,42 @@ clínicas asignadas a cada zona.
 
 ---
 
+## Usuarios (`USR`)
+
+**Objetivo:** listar las cuentas que existen en el sistema, que son exactamente las que pueden
+autenticarse con magic link.
+
+**Responsabilidades**
+- Consultar `users` en SQLite con filtro por nombre o correo, paginación y orden por `id`
+  (`app/controllers/usuarios_controller.ts`).
+- Exponer solo los campos que la referencia muestra: `full_name`, `email`, `area`, `rol`,
+  `superadmin`.
+- Presentar la tabla, el buscador y la paginación (`inertia/pages/usuarios.tsx`).
+
+**No es responsable de**
+- Crear, editar ni dar de baja cuentas: el modal "Nuevo usuario" y el menú `···` son maqueta, no hay
+  ruta que escriba. Quien llega al sistema por magic link tiene que existir de antemano.
+- Autorización: `area`, `rol` y `superadmin` son **datos de pantalla**. Nada en el servidor los lee;
+  el acceso sigue siendo binario (`middleware.auth()`).
+- Mostrar `password`: la columna existe y es `NOT NULL`, pero no se selecciona.
+
+**Dependencias**
+- **SQLite**, no Supabase: es el único catálogo que lee la conexión de autenticación, y por eso no
+  usa `withConnectionRetry()` (ese reintento existe para cortes del pool de `pg`).
+- La migración `1780000000000_add_area_rol_superadmin_to_users_table` añade `area`, `rol` y
+  `superadmin`; sin ellas no se podrían mostrar las columnas de la referencia.
+
+**Archivos**
+
+| Archivo | Rol |
+|---|---|
+| `app/models/user.ts` | Modelo Lucid de autenticación que también sirve de catálogo (con `area`, `rol`, `superadmin` declarados a propósito) |
+| `app/controllers/usuarios_controller.ts` | Filtro `q` (nombre o correo), paginación y render |
+| `inertia/pages/usuarios.tsx` | Tabla de 5 columnas, buscador, paginación, modal maqueta |
+| `database/migrations/1780000000000_add_area_rol_superadmin_to_users_table.ts` | Añade las tres columnas de pantalla |
+
+---
+
 ## Shell del panel (`ADM`)
 
 **Objetivo:** marco visual y navegación común del área autenticada.
@@ -199,8 +236,13 @@ clínicas asignadas a cada zona.
 
 ## Brechas
 
-- **No existe módulo de autorización**: `roles-permissions`, policies y abilities están vacíos; el control de acceso es binario.
-- **No existe módulo de catálogo para el resto del dominio**: SKU, familias y usuarios viven como páginas que importan arrays hardcodeados. Cada uno necesitará su módulo al pasar a datos reales.
-- Los catálogos de insumos, kits, zonas y módulos de salud comparten forma y conexión, pero están duplicados como módulos independientes; no hay una abstracción común de catálogo.
+- **No existe módulo de autorización**: `roles-permissions`, policies y abilities están vacíos; el
+  control de acceso es binario. Tener columnas `rol` y `superadmin` no cuenta como autorización.
+- **No existe módulo de catálogo para el resto del dominio**: SKU y familias viven como páginas que
+  importan arrays hardcodeados. Cada uno necesitará su módulo al pasar a datos reales.
+- Los catálogos de insumos, kits, zonas y módulos de salud comparten forma y conexión, pero están
+  duplicados como módulos independientes; no hay una abstracción común de catálogo. `/usuarios` se
+  suma a esa lista con una diferencia: lee otra conexión (SQLite) y comparte el modelo con la
+  autenticación.
 - **No existe módulo de API**: `providers/api_provider.ts` y el registro de Tuyau están montados, pero ninguna ruta devuelve JSON.
 - Los límites entre módulos se apoyan en convención (rutas en `start/routes.ts`, alias `#models/*`, `#services/*`) y no en una capa de dominio o casos de uso.

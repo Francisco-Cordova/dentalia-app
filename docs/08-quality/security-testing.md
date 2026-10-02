@@ -48,7 +48,7 @@ Idénticos a los priorizados en
 | SEC-002 | Alta | **Autoregistro abierto**: `POST /signup` concede el mismo estado que un acceso concedido | Abierto | Deshabilitar la ruta o exigir invitación |
 | SEC-007 | Alta | **Sin rate limiting**: fuerza bruta de magic link y spam de correo | Abierto | Rate limit por IP y por email en `MagicLinkController` |
 | SEC-010 | Alta | **Sin CSP**: no hay defensa ante XSS si uno se introduce | Abierto | Habilitar `csp` en `config/shield.ts` |
-| SEC-003 | Media | **Toda sesión equivale a administrador**: no hay roles | Abierto | Añadir rol en `users` y guard en el middleware |
+| SEC-003 | Media | **Toda sesión equivale a administrador**: `users.rol` y `users.superadmin` son datos que no se leen | Abierto | Matriz de roles y guard en el middleware; decidir qué pasa con esas dos columnas |
 | SEC-006 | Media | **Enumeración de correos**: la respuesta es idéntica, pero el timing y el correo recibido delatan el registro | Abierto | Respuesta con retardo constante |
 | SEC-001 | Media | **CORS reflejo en DEV con `credentials`** | Aceptado | Documentado como riesgo exclusivo de DEV; nunca desplegar con `NODE_ENV=development` |
 | SEC-004 | Media | **Sesión en cookie sin rotación de ID** y con vigencia de 2 h | Abierto | Rotar el ID en el login y reducir la vigencia |
@@ -63,7 +63,8 @@ Idénticos a los priorizados en
 - [Autorización](../06-security/authorization.md)
 - [Política de auditoría](../06-security/audit-policy.md)
 - [Casos de prueba](test-cases.md)
-- `config/shield.ts`, `config/cors.ts`, `app/controllers/magic_link_controller.ts`
+- `config/shield.ts`, `config/cors.ts`, `app/controllers/magic_link_controller.ts`,
+  `app/controllers/usuarios_controller.ts`
 
 ## Brechas
 

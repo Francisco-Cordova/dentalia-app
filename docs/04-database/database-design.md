@@ -45,7 +45,7 @@ El catálogo vive en PostgreSQL porque ya existe allí y no se replica (ver
 
 | Entidad | Conexión | Responsabilidad |
 |---|---|---|
-| `users` | sqlite | Persona con sesión. Solo email, nombre opcional y hash de contraseña. Creada por el seeder o por `POST /signup` |
+| `users` | sqlite | Persona con sesión. Solo email, nombre opcional, hash de contraseña y los datos de pantalla `area`, `rol` y `superadmin`. Creada por el seeder o por `POST /signup`. Es también la fuente del catálogo de `/usuarios` |
 | `magic_links` | sqlite | Token de un solo uso hasheado, ligado a `user_id`, con expiración (30 min) y `used_at` |
 | `dev."Insumos"` | supabase | Catálogo de insumos del proveedor: nombre, código, marca, cantidad y costo |
 | `dev."Kits"` | supabase | Catálogo de kits: nombre, código de Odoo, costo, descripción y la lista de insumos que lo componen |
@@ -87,6 +87,9 @@ El catálogo vive en PostgreSQL porque ya existe allí y no se replica (ver
 | `users.email` | `NOT NULL` + `UNIQUE` (índice `users_email_unique`) | migración `1761885935168` |
 | `users.full_name` | `NULLABLE` | migración |
 | `users.password` | `NOT NULL` | migración |
+| `users.area` | `NULLABLE` | migración `1780000000000` |
+| `users.rol` | `NULLABLE` | migración `1780000000000` |
+| `users.superadmin` | `NOT NULL` + default `false` | migración `1780000000000` |
 | `magic_links.user_id` | `NULLABLE` + FK a `users.id` `ON DELETE CASCADE` | migración `1761885935169` |
 | `magic_links.token_hash` | `NOT NULL` + `UNIQUE` (índice `magic_links_token_hash_unique`) | migración |
 | `magic_links.expires_at` | `NOT NULL` | migración |
@@ -149,8 +152,9 @@ pequeños.
 - **`magic_links.user_id` es nullable**: el esquema lo permite aunque la aplicación siempre lo
   escriba. Nada impide un enlace huérfano por inserción directa.
 - **Los esquemas restantes del catálogo no están modelados** (SKUs, familias, usuarios de
-  negocio): solo existen `dev."Insumos"`, `dev."Kits"`, `dev."zonas"` (con
-  `public.clinicas_zonas` para el conteo de clínicas) y `dev.modulos_salud`.
+  negocio del catálogo externo): solo existen `dev."Insumos"`, `dev."Kits"`, `dev."zonas"` (con
+  `public.clinicas_zonas` para el conteo de clínicas) y `dev.modulos_salud`. El catálogo de
+  usuarios **no** viene de aquí: se lee `users` de SQLite, que es la tabla de la autenticación.
 - **No hay relación entre módulos de salud y SKUs**: `public."SKU"` no tiene columna ni FK hacia
   un módulo, así que el conteo de SKUs por módulo que muestra la referencia de diseño no es
   derivable. La pantalla muestra `0` como dato dummy.
@@ -162,6 +166,13 @@ pequeños.
   `public.clinicas_zonas` quedó **verificado** el 2026-09-30 con `SELECT count(*)`.
 - El conteo de 10 filas de `dev.modulos_salud` (y su duplicado `public.modulos_salud`), los 255
   de `public."SKU"` y el 0 de `public.especialidades` quedó **verificado** el 2026-10-01.
+- El conteo de **`users` (SQLite) también quedó verificado el 2026-10-01: 1 fila**. Antes había
+  18, de las cuales 17 eran usuarios de prueba que dejaron scripts de humo descartables
+  (`verify-*`, `dbg-*`, `smoke@*`); se borraron junto con sus `magic_links`. Como `tmp/db.sqlite3`
+  está gitignored, esta limpieza es local y hay que repetirla en otro entorno.
+- **La migración que añade `area`, `rol` y `superadmin` es de las pocas que se aplica sobre la base
+  de autenticación**: un `down()` pierde datos que no se pueden reconstruir, porque eran valores de
+  negocio escritos a mano, no derivados.
 
 ## Referencias
 - [Diccionario de datos](data-dictionary.md)

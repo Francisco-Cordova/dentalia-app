@@ -13,7 +13,7 @@
 
 | Actor | Tipo | Interacción |
 |---|---|---|
-| Administrador | Humano, autenticado | Navega el panel: SKUs, Familias, Insumos, Kits, Usuarios, Zonas, Módulos de salud. Hoy **Insumos**, **Kits**, **Zonas** y **Módulos de salud** tienen datos reales |
+| Administrador | Humano, autenticado | Navega el panel: SKUs, Familias, Insumos, Kits, Usuarios, Zonas, Módulos de salud. Hoy **Insumos**, **Kits**, **Zonas**, **Módulos de salud** y **Usuarios** tienen datos reales |
 | Visitante | Humano, sin sesión | Única pantalla de acceso: solicita un enlace por correo |
 | Cliente HTTP / navegador | Sistema | Único consumidor de la aplicación. No hay integraciones de sistema a sistema |
 

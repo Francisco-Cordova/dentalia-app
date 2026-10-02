@@ -41,12 +41,13 @@ problema y si existe una alternativa vigente (Excel, consulta directa a Supabase
 
 | Tipo | Descripción | Acceso | Evidencia |
 |---|---|---|---|
-| **Usuario del panel** | Cualquier persona con una sesión válida. El código no distingue entre ellas | Todas las pantallas | `middleware.auth()` es binario; no hay columna de rol |
+| **Usuario del panel** | Cualquier persona con una sesión válida. El código no distingue entre ellas | Todas las pantallas | `middleware.auth()` es binario; `users.rol` y `users.superadmin` son datos que nadie lee para autorizar |
 | Visitante | Sin sesión | Solo `/` y, escribiendo la URL, `/signup` | `middleware.guest()` protege `/` y `signup` |
 | Destinatario del enlace | Persona a la que se envía el magic link y que hace clic una vez | Obtiene sesión al consumir el enlace | `magic_link_controller.ts` |
 
 **No hay roles de negocio definidos.** El sidebar muestra una sección "Admin" (usuarios, zonas,
-módulos de salud) pero no corresponde a ningún permiso: es un regrouping visual.
+módulos de salud) pero no corresponde a ningún permiso: es un regrouping visual. Las columnas `Rol` y
+`Superadmin` que ahora muestra `/usuarios` vienen de la plantilla de diseño y hoy son informativas.
 
 ## Módulos y estado real
 
@@ -59,11 +60,17 @@ módulos de salud) pero no corresponde a ningún permiso: es un regrouping visua
 | `KIT` | Kits de insumos | FEATURE-005 `READY` | `dev."Kits"` (40 filas) |
 | `ZON` | Zonas | FEATURE-007 `READY` | `dev."zonas"` (2 filas) + `public.clinicas_zonas` |
 | `MSD` | Módulos de salud | FEATURE-008 `READY` | `dev.modulos_salud` (10 filas) |
-| `USR` | Usuarios | Maqueta | Ninguno |
+| `USR` | Usuarios | FEATURE-006 `READY` | SQLite `users` (1 fila) |
 | `ADM` | Shell del panel (sidebar, layout, toasts) | Funcional | — |
 
-De las 9 secciones del sidebar, **1 de 8 páginas de dominio tiene datos** (`/insumos`); las otras 7
-importan arrays hardcodeados dentro del propio archivo de la página.
+De las 9 secciones del sidebar, **6 de 8 páginas de dominio tienen datos** (`/insumos`, `/kits`,
+`/zonas`, `/modulos-de-salud` y `/usuarios`); solo `/skus` y `/familias` importan arrays hardcodeados
+dentro del propio archivo de la página.
+
+`/usuarios` rompe el patrón del resto del catálogo: no lee Supabase sino `users` de SQLite, que es
+la misma tabla de la autenticación. Eso significa que el catálogo de usuarios **solo puede listar
+las cuentas que ya pueden entrar al sistema**; no hay forma de mostrar un contacto que no tenga
+acceso.
 
 ## Volumen esperado
 

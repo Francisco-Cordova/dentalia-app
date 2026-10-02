@@ -42,18 +42,22 @@ Lo que sí existe y es JSON:
 | GET | `/familias` | `familias` | `renderInertia` | `{}` (mock) |
 | GET | `/insumos` | `insumos` | `InsumosController.index` | `insumos`, `total`, `page`, `lastPage`, `nombre`, `codigo` |
 | GET | `/kits` | `kits` | `KitsController.index` | `kits[]`, `total`, `page`, `lastPage`, `nombre`, `codigo` |
-| GET | `/usuarios` | `usuarios` | `renderInertia` | `{}` (mock) |
+| GET | `/usuarios` | `usuarios` | `UsuariosController.index` | `usuarios[]`, `total`, `page`, `lastPage`, `q` |
 | GET | `/zonas` | `zonas` | `ZonasController.index` | `zonas[]`, `total`, `page`, `lastPage`, `nombre` |
 | GET | `/modulos-de-salud` | `modulosDeSalud` | `ModulosSaludController.index` | `modulos[]`, `total`, `page`, `lastPage`, `nombre` |
 | GET | `/home` | `home` | `renderInertia` | `{}` (mock) |
 | POST | `/logout` | `session.destroy` | `SessionController.destroy` | 302 a `/` |
 
 Las páginas que siguen en mock registran **solo GET** vía `router.on(...)`: se verificó que POST,
-PUT, DELETE y PATCH devuelven 404. `/insumos`, `/kits`, `/zonas` y `/modulos-de-salud` usan
-`router.get(...)` con un handler, y tampoco aceptan más métodos.
+PUT, DELETE y PATCH devuelven 404. `/insumos`, `/kits`, `/zonas`, `/modulos-de-salud` y `/usuarios`
+usan `router.get(...)` con un handler, y tampoco aceptan más métodos.
 
 Query params de `/insumos` y `/kits`: `page`, `nombre`, `codigo`. De `/zonas` y
-`/modulos-de-salud`: `page`, `nombre`.
+`/modulos-de-salud`: `page`, `nombre`. De `/usuarios`: `page`, `q` (un solo buscador que compara
+contra nombre **o** correo).
+
+`/usuarios` no devuelve `password` aunque la columna sea `NOT NULL`: el controller selecciona los
+campos uno a uno en vez de pedir `SELECT *`.
 
 ## Handlers sin ruta
 
@@ -70,6 +74,8 @@ inalcanzable.
   `useRouter().get({ route: 'insumos', qs })`. Los nombres viven en `.adonisjs/client/registry`.
 - **Estado en la query string**: filtros y página viajan como `qs` (`nombre`, `codigo`, `page`).
 - **Props planas**: el controller devuelve campos sueltos, no un objeto `paginate()` crudo.
+- **Selección explícita de columnas**: los catálogos eligen los campos en el `select`, nunca
+  `SELECT *`. En `/usuarios` esto es lo que impide que el hash de `password` viaje al navegador.
 - **Sin API versionada**: no hay `/api/v1`, ni negotiated content, ni OpenAPI
    (ver [Brechas](../README.md)).
 
@@ -84,6 +90,9 @@ inalcanzable.
 - **Sin OpenAPI**: no hay contrato de API generado ni mantenido a mano.
 - **Sin API de negocio**: cualquier consumidor externo (app móvil, otro panel, integración) exigiría
   diseñarla desde cero; hoy solo existe la frontera Inertia.
+- **`/usuarios` es una lectura autenticada sin escritura**: expone el correo de todas las cuentas a
+  cualquiera con sesión, y no hay forma de crearlas, editarlas ni borrarlas desde la app. Mientras
+  `middleware.auth()` sea el único control, cualquier usuario autenticado ve la lista completa.
 - **Cliente HTTP generado sin uso**: `providers/api_provider.ts` y `@tuyau/core` están montados y
   ningún endpoint los alimenta. Es andamiaje preparado que puede confundir a quien lo lea.
 - **Sin versionado de `props`**: no hay `InertiaOptions.version`, así que un HTML cacheado con

@@ -6,8 +6,8 @@
 |---|---|
 | Estado | ANALYZED |
 | Responsable | Dev owner |
-| Última actualización | 2026-09-30 |
-| Versión relacionada | 2332e22 |
+| Última actualización | 2026-10-02 |
+| Versión relacionada | b69cb3d |
 
 ## Motores
 

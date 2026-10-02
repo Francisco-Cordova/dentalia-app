@@ -6,8 +6,8 @@
 |---|---|
 | Estado | ANALYZED |
 | Responsable | Dev owner |
-| Última actualización | 2026-09-30 |
-| Versión relacionada | 2332e22 |
+| Última actualización | 2026-10-02 |
+| Versión relacionada | b69cb3d |
 
 El modelo se divide en **dos bases de datos sin relación entre sí**. Por eso el diagrama se
 presenta en dos bloques y no en un único grafo.
@@ -94,7 +94,36 @@ erDiagram
         bigint zona_id FK "a public.zonas.id"
         timestamptz created_at
     }
+
+    SKU {
+        bigint id PK "8..287, disperso"
+        text Nombre "buscable, admite NULL"
+        bigint ID_tratamiento UK "columna real: ID tratamiento"
+        text ID_SKU "buscable, admite NULL, no unico"
+    }
+
+    MODULOS_SALUD {
+        bigint id PK "1..10, contiguo"
+        text nombre "buscable"
+        text descripcion "subtexto bajo el nombre"
+        timestamptz created_at "no usada por la UI"
+    }
 ```
+
+Las entidades sin claves foráneas se dibujan igual como cajas sueltas, sin aristas: es el caso de
+`INSUMOS`, `KITS`, `SKU` y `MODULOS_SALUD`, que la app lee pero entre las que no hay integridad
+referencial. Lo que la app **no** consulta -las tablas de detalle en `public` que apuntan a
+`public."SKU"`, y el duplicado `public."SKU"`- se detalla aparte en los diagramas de flujo de abajo,
+porque no forma parte del modelo que la aplicación usa.
+
+De `SKU` solo se dibujan las 4 columnas que lee la app: la tabla tiene **25** (precios, comisiones,
+márgenes, costos, `sesiones`). De `MODULOS_SALUD` no se dibujan `id_modulo` ni `updated_at`, que
+existen pero no se declaran a propósito. Las 25 y 6 columnas completas están en
+[data-dictionary.md](data-dictionary.md).
+
+Dos columnas de `SKU` llevan el nombre cambiado porque mermaid no admite espacios en los atributos de
+un `erDiagram`: `ID_tratamiento` es `"ID tratamiento"` e `ID_SKU` es `"ID SKU"`. El nombre real está
+en el comentario.
 
 ### Sin relación entre `INSUMOS` y `KITS`
 No hay clave foránea. La composición de un kit se codifica **dentro del texto** de
